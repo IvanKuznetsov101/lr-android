@@ -1,6 +1,7 @@
 package com.vsu.test
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -14,7 +15,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.vsu.test.data.TokenManager
 import com.vsu.test.presentation.ui.screens.AboutScreen
@@ -24,18 +27,32 @@ import com.vsu.test.presentation.ui.screens.MoreScreen
 import com.vsu.test.presentation.ui.screens.RegistrationScreen
 import com.vsu.test.presentation.ui.screens.SettingsScreen
 import com.vsu.test.presentation.ui.theme.TestTheme
+import com.vsu.test.service.LocationService
+import com.vsu.test.service.LocationWorker
 import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject lateinit var tokenManager: TokenManager
+    @Inject lateinit var locationService: LocationService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val workRequest = PeriodicWorkRequestBuilder<LocationWorker>(
+            repeatInterval = 15, // Повтор каждые 15 минут
+            repeatIntervalTimeUnit = TimeUnit.MINUTES
+        ).build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "location_work", // Уникальное имя задачи
+            ExistingPeriodicWorkPolicy.KEEP, // Сохранять существующую задачу, если она уже есть
+            workRequest
+        )
 
         setContent {
             TestTheme {
@@ -106,6 +123,11 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         MapKitFactory.getInstance().onStop()
+    }
+
+    private fun startLocationService() {
+        val serviceIntent = Intent(this, LocationService::class.java)
+        startForegroundService(serviceIntent)
     }
 }
 

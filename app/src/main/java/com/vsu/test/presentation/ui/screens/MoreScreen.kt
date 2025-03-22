@@ -1,6 +1,7 @@
 package com.vsu.test.presentation.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,10 +24,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.vsu.test.MainActivity
 import com.vsu.test.R
 import com.vsu.test.domain.usecase.MoreState
 import com.vsu.test.presentation.ui.components.CombinedActions
 import com.vsu.test.presentation.viewmodel.MoreViewModel
+import com.vsu.test.service.LocationService
 
 @Composable
 fun MoreScreen(viewModel: MoreViewModel = hiltViewModel(),
@@ -40,8 +43,8 @@ fun MoreScreen(viewModel: MoreViewModel = hiltViewModel(),
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions[Manifest.permission.ACCESS_BACKGROUND_LOCATION] == true) {
-            // Разрешение на фоновое местоположение получено
-            // Здесь можно добавить нужные действия
+            val serviceIntent = Intent(context, LocationService::class.java)
+            context.startForegroundService(serviceIntent)
         } else {
             // Разрешение не получено
             // Можно показать сообщение или обработать отказ
