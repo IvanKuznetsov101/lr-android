@@ -1,6 +1,7 @@
 package com.vsu.test.data.repository
 
 import com.vsu.test.data.api.ProfileService
+import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.ProfileDTO
 import com.vsu.test.data.api.model.request.SignUpRequest
 import com.vsu.test.data.api.model.request.UpdateProfileCoordinatesRequest
@@ -25,11 +26,18 @@ class ProfileRepository @Inject constructor(
 
         return safeApiCall { profileService.createProfile(request) }
     }
-    suspend fun updateProfileCoordinates(locationData: LocationData): NetworkResult<List<Long>> {
+    suspend fun updateProfileCoordinatesAndGetIds(locationData: LocationData): NetworkResult<List<Long>> {
         val request = UpdateProfileCoordinatesRequest(
             id = locationData.id,
             latitude = locationData.latitude,
             longitude = locationData.longitude)
-        return safeApiCall { profileService.updateProfileCoordinates(request) }
+        return safeApiCall { profileService.updateProfileCoordinatesAndGetIds(request) }
+    }
+    suspend fun updateProfileCoordinatesAndGetEvents(locationData: LocationData): NetworkResult<List<EventDTO>> {
+        val request = UpdateProfileCoordinatesRequest(
+            id = locationData.id,
+            latitude = locationData.latitude,
+            longitude = locationData.longitude)
+        return safeApiCall { profileService.updateProfileCoordinatesAndGetEvents(request) }
     }
 }

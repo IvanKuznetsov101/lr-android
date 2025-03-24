@@ -16,7 +16,7 @@ class GetEventStateUseCase @Inject constructor(
             val eventDTO = profileResponse.data
             MoreState.UserEvent(eventDTO)
         } else {
-            val eventResponse = profileRepository.updateProfileCoordinates(locationData)
+            val eventResponse = profileRepository.updateProfileCoordinatesAndGetEvents(locationData)
             if (eventResponse  is NetworkResult.Success && eventResponse.data?.size!! > 0){
                 val events = eventResponse.data.toList()
                 MoreState.EventsInRadius(events)
@@ -28,6 +28,6 @@ class GetEventStateUseCase @Inject constructor(
 
 sealed class MoreState {
     data class UserEvent(val event: EventDTO) : MoreState()
-    data class EventsInRadius(val events: List<Long>) : MoreState()
+    data class EventsInRadius(val events: List<EventDTO>) : MoreState()
     object NoEvents : MoreState()
 }

@@ -76,8 +76,7 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions[ACCESS_FINE_LOCATION] == true &&
-            permissions[ACCESS_COARSE_LOCATION] == true &&
-            permissions[POST_NOTIFICATIONS] == true) {
+            permissions[ACCESS_COARSE_LOCATION] == true) {
             viewModel.onPermissionGranted(mapView)
             mapView.onStart() // Вызываем onStart здесь, если он зависит от разрешений
         }
@@ -85,13 +84,12 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
 
     LaunchedEffect(Unit) {
         if (checkSelfPermission(context, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED &&
-            checkSelfPermission(context, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED &&
-            checkSelfPermission(context, POST_NOTIFICATIONS) == PERMISSION_GRANTED) {
+            checkSelfPermission(context, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED) {
             viewModel.onPermissionGranted(mapView)
             mapView.onStart() // Вызываем onStart здесь, если разрешения уже есть
         } else {
             checkLocationPermission.launch(
-                arrayOf(ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION, POST_NOTIFICATIONS)
+                arrayOf(ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION)
             )
         }
     }

@@ -4,15 +4,13 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.vsu.test.data.TokenManager
 import com.vsu.test.domain.model.LocationData
+import com.vsu.test.domain.usecase.DeleteLightRoomByEventIdUseCase
 import com.vsu.test.domain.usecase.GetEventStateUseCase
 import com.vsu.test.domain.usecase.MoreState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MoreViewModel @Inject constructor(
     private val getEventStateUseCase: GetEventStateUseCase,
+    private val deleteLightRoomByEventIdUseCase: DeleteLightRoomByEventIdUseCase,
     private val fusedLocationClient: FusedLocationProviderClient,
     private val tokenManager: TokenManager
 ) : ViewModel() {
@@ -44,6 +43,12 @@ class MoreViewModel @Inject constructor(
                     _state.value = getEventStateUseCase(locationDto)
                 }
             }
+        }
+    }
+    fun deleteLightRoomByEventId(id: Long, context: Context){
+        viewModelScope.launch {
+            deleteLightRoomByEventIdUseCase.invoke(id)
+            updateState(context)
         }
     }
 }
