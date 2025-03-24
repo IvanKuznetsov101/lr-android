@@ -21,7 +21,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.vsu.test.MainActivity
-import com.vsu.test.data.TokenManager
+import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.domain.model.LocationData
 import com.vsu.test.domain.usecase.GetEventByLightRoomIdUseCase

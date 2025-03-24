@@ -27,5 +27,5 @@ interface LightRoomService {
     suspend fun deleteEvent(@Path("id") id: Long): Response<LightRoomDTO>
 
     @GET("/api/lightroom/event/{id}")
-    suspend fun getLightRoomByEventId(@Path("id") id: Long): Response<Long>
+    suspend fun getLightRoomByEventId(@Path("id") id: Long): Response<LightRoomDTO>
 }

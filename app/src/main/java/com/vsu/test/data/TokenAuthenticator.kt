@@ -2,6 +2,7 @@ package com.vsu.test.data
 
 import com.vsu.test.data.api.AuthService
 import com.vsu.test.data.api.model.request.RefreshJwtRequest
+import com.vsu.test.data.storage.TokenManager
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response

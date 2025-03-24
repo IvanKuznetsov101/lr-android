@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,7 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.vsu.test.data.TokenManager
+import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.presentation.ui.screens.AboutScreen
 import com.vsu.test.presentation.ui.screens.LoginScreen
 import com.vsu.test.presentation.ui.screens.MapScreen

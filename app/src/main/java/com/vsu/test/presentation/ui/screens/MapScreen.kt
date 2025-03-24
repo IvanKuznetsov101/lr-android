@@ -43,9 +43,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.vsu.test.R
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.LightRoomDTO
+import com.vsu.test.domain.model.EventWithLightRoomData
 import com.vsu.test.presentation.ui.components.CRUDEvent
 import com.vsu.test.presentation.ui.components.CombinedActions
 import com.vsu.test.presentation.ui.components.LightRoomBottomSheetContent
+import com.vsu.test.presentation.ui.components.LightRoomBottomSheetHandler
 import com.vsu.test.presentation.ui.components.ListItem
 import com.vsu.test.presentation.ui.components.LocationButton
 import com.vsu.test.presentation.viewmodel.EventViewModel
@@ -71,6 +73,8 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
     val eventViewModel: EventViewModel = hiltViewModel()
     val mapView = remember { MapView(context) }
     val imageProvider = ImageProvider.fromResource(context, R.drawable.ic_lightroom)
+
+
 
     val checkLocationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -131,13 +135,25 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
 
-        selectedLightRoomDTO?.let { dto ->
-            ModalBottomSheet(
-                onDismissRequest = { selectedLightRoomDTO = null },
-                sheetState = lightRoomSheetState
-            ) {
-                LightRoomBottomSheetContent(lightRoomDTO = dto, eventViewModel) // Передаем DTO в BottomSheet
-            }
+        selectedLightRoomDTO?.let { lightRoomDTO ->
+            LightRoomBottomSheetHandler(initialEventData = null,
+                lightRoomDTO = lightRoomDTO,
+                eventViewModel = eventViewModel,
+                onDismiss = { selectedLightRoomDTO = null })
+//            ModalBottomSheet(
+//                onDismissRequest = { selectedLightRoomDTO = null },
+//                sheetState = lightRoomSheetState
+//            ) {
+//                eventViewModel.getEventByLightRoomId(lightRoomDTO.id)
+//                if (isLoading) {
+//                    Box(Modifier.fillMaxWidth()) {
+//                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+//                    }
+//                } else{
+//                    val eventWithLightRoom = EventWithLightRoomData(event = event, lightRoom = lightRoomDTO)
+//                    LightRoomBottomSheetContent(eventWithLightRoom)
+//                }
+//            }
         }
 
         MapControls(

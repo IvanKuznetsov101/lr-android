@@ -1,7 +1,6 @@
 package com.vsu.test.data.repository
 
 import com.vsu.test.data.api.LightRoomService
-import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.LightRoomDTO
 import com.vsu.test.data.api.model.request.LightRoomRequest
 import com.vsu.test.utils.BaseApiResponse
@@ -25,7 +24,7 @@ class LightRoomRepository @Inject constructor(
     suspend fun deleteLightRoom(id: Long): NetworkResult<LightRoomDTO>{
         return safeApiCall { lightRoomService.deleteEvent(id = id) }
     }
-    suspend fun getLightRoomByEventID(id:Long): NetworkResult<Long>{
+    suspend fun getLightRoomByEventID(id:Long): NetworkResult<LightRoomDTO>{
         return safeApiCall { lightRoomService.getLightRoomByEventId(id) }
     }
 }

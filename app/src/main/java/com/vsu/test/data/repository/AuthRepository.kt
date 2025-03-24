@@ -1,6 +1,6 @@
 package com.vsu.test.data.repository
 
-import com.vsu.test.data.TokenManager
+import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.data.api.AuthService
 import com.vsu.test.data.api.model.dto.JwtResponse
 import com.vsu.test.data.api.model.request.JwtRequest

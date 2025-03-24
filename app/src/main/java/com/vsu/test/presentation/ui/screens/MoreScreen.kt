@@ -22,7 +22,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,12 +45,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vsu.test.MainActivity
 import com.vsu.test.R
 import com.vsu.test.data.api.model.dto.EventDTO
+import com.vsu.test.data.api.model.dto.LightRoomDTO
+import com.vsu.test.domain.model.EventWithLightRoomData
 import com.vsu.test.domain.usecase.MoreState
 import com.vsu.test.presentation.ui.components.CombinedActions
 import com.vsu.test.presentation.ui.components.EventCard
+import com.vsu.test.presentation.ui.components.LightRoomBottomSheetHandler
 import com.vsu.test.presentation.viewmodel.EventViewModel
 import com.vsu.test.presentation.viewmodel.MoreViewModel
 import com.vsu.test.service.LocationService
@@ -60,12 +66,13 @@ fun MoreScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToMap: () -> Unit
 ) {
-    val context = LocalContext.current
-    val state by viewModel.state.collectAsState() // Слушаем состояние из ViewModel
 
-    // Инициализация состояния только один раз при первом рендере
+    val context = LocalContext.current
+    val state by viewModel.state.collectAsState()
+
+
     LaunchedEffect(Unit) {
-        if (state is MoreState.NoEvents) { // Вызываем обновление только если состояние не инициализировано
+        if (state is MoreState.NoEvents) {
             viewModel.updateState(context)
         }
     }
@@ -110,6 +117,7 @@ private fun ContentBox(
     eventViewModel: EventViewModel,
     context: Context
 ) {
+    val imagesByEvent by eventViewModel.imagesByEvent.collectAsState()
     Box(
         modifier = Modifier
             .height(700.dp)
@@ -122,18 +130,19 @@ private fun ContentBox(
             when (state) {
                 is MoreState.UserEvent -> {
                     EventCard(
-                        eventDTO = state.event,
+                        imagesUrls = imagesByEvent[state.eventWithLightRoom.event.id] ?: emptyList(),
+                        eventDTO = state.eventWithLightRoom.event,
                         textOnButton = "Delete",
                         eventViewModel = eventViewModel,
                         visitorCount = 999,
                         onClickButton = {
-                            viewModel.deleteLightRoomByEventId(state.event.id, context)
+                            viewModel.deleteLightRoomById(state.eventWithLightRoom.lightRoom.id, context)
                         },
                         onClickCard = {}
                     )
                 }
                 is MoreState.EventsInRadius -> {
-                    EventCarouselScreen(events = state.events, eventViewModel = eventViewModel)
+                    EventCarouselScreen(eventsWithLightRooms = state.eventsWithLightRoom, eventViewModel = eventViewModel, moreViewModel = viewModel, context = context)
                 }
                 is MoreState.NoEvents -> {
                     PlaceholderContent()
@@ -145,25 +154,47 @@ private fun ContentBox(
 
 @Composable
 private fun EventCarouselScreen(
-    events: List<EventDTO>,
-    eventViewModel: EventViewModel
+    eventsWithLightRooms: List<EventWithLightRoomData>,
+    eventViewModel: EventViewModel,
+    moreViewModel: MoreViewModel,
+    context: Context
 ) {
-    val pagerState = rememberPagerState { events.size }
+    val pagerState = rememberPagerState { eventsWithLightRooms.size }
+    var isSheetOpen by remember { mutableStateOf(false) }
+    var selectedEvent by remember { mutableStateOf<EventDTO?>(null) }
 
+    val imagesByEvent by eventViewModel.imagesByEvent.collectAsState()
+
+
+    LaunchedEffect(eventsWithLightRooms) {
+        eventsWithLightRooms.forEach { eventWithLightRoom ->
+            eventViewModel.getImagesByEventId(eventWithLightRoom.event.id)
+        }
+    }
     HorizontalPager(
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->
-        val event = events[page]
+        val eventWithLightRoom = eventsWithLightRooms[page]
         EventCard(
-            eventDTO = event,
+            imagesUrls = imagesByEvent[eventWithLightRoom.event.id] ?: emptyList(),
+            eventDTO = eventWithLightRoom.event,
             textOnButton = "Join",
             eventViewModel = eventViewModel,
             visitorCount = 999,
-            onClickButton = { /* Handle join logic */ },
-            onClickCard = { /* Handle card click */ }
+            onClickButton = { moreViewModel.createVisitor(eventWithLightRoom.lightRoom.id, context) },
+            onClickCard = { isSheetOpen = true
+                            selectedEvent = eventWithLightRoom.event}
         )
+        if (isSheetOpen)
+            LightRoomBottomSheetHandler(
+                initialEventData = eventWithLightRoom,
+                lightRoomDTO = null,
+                eventViewModel = eventViewModel,
+                onDismiss = { isSheetOpen = false }
+            )
     }
+
 }
 
 @Composable

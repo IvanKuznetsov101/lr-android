@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
-import com.vsu.test.data.TokenManager
+import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.domain.usecase.CreateEventUseCase
 import com.vsu.test.domain.usecase.CreateLightRoomUseCase
@@ -43,8 +43,8 @@ class EventViewModel @Inject constructor(
     val loading = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
 
-    private val _selectedEventImagesUrls = MutableStateFlow<List<String>>(emptyList())
-    val selectedEventImagesUrls: StateFlow<List<String>> = _selectedEventImagesUrls
+    private val _imagesByEvent = MutableStateFlow<Map<Long, List<String>>>(emptyMap())
+    val imagesByEvent: StateFlow<Map<Long, List<String>>> = _imagesByEvent
 
     fun getImagesByEventId(eventId: Long) {
         viewModelScope.launch {
@@ -52,15 +52,13 @@ class EventViewModel @Inject constructor(
             try {
                 val response = getImagesUrlsByEventIdUseCase.invoke(eventId)
                 if (response is NetworkResult.Success) {
-                    _selectedEventImagesUrls.value = (response.data ?: emptyList()).toList()
-                    Log.d("EventViewModel", "Ссылки загружены: ${_selectedEventImagesUrls.value.size}")
+                    val images = response.data ?: emptyList()
+                    _imagesByEvent.value = _imagesByEvent.value + (eventId to images)
                 } else if (response is NetworkResult.Error) {
                     error.value = response.message
-                    Log.e("EventViewModel", "Ошибка загрузки изображений: ${response.message}")
                 }
             } catch (e: Exception) {
                 error.value = e.message
-                Log.e("EventViewModel", "Исключение при загрузке: ${e.message}")
             } finally {
                 loading.value = false
             }

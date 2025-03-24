@@ -11,7 +11,7 @@ class VisitorRepository @Inject constructor(
     private val visitorService: VisitorService
 ): BaseApiResponse() {
 
-    suspend fun createEvent(profileId: Long, lightRoomId: Long, visitorId: Long?): NetworkResult<VisitorDTO>{
+    suspend fun createVisitor(profileId: Long, lightRoomId: Long, visitorId: Long?): NetworkResult<VisitorDTO>{
         val visitorRequest = CreateVisitorRequest(profileId, lightRoomId, visitorId)
         return safeApiCall { visitorService.createVisitor(visitorRequest) }
     }

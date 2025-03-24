@@ -1,7 +1,7 @@
 package com.vsu.test.data.interceptors
 
 import android.util.Log
-import com.vsu.test.data.TokenManager
+import com.vsu.test.data.storage.TokenManager
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject

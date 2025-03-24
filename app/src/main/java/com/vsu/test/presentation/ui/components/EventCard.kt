@@ -37,24 +37,24 @@ import com.vsu.test.presentation.viewmodel.EventViewModel
 
 
 @Composable
-fun EventCard(eventDTO: EventDTO,
+fun EventCard(imagesUrls: List<String>,
+              eventDTO: EventDTO,
               textOnButton: String,
               eventViewModel: EventViewModel,
               visitorCount: Int,
               onClickButton: ()-> Unit,
               onClickCard: ()-> Unit)
 {
-    val imagesUrls by eventViewModel.selectedEventImagesUrls.collectAsState(initial = emptyList())
-    val isLoading by eventViewModel.loading.collectAsState(initial = false)
+
+//    val isLoading by eventViewModel.loading.collectAsState(initial = false)
     val event by eventViewModel.event.collectAsState()
 
 
-    eventViewModel.getImagesByEventId(eventDTO.id)
-    if (isLoading) {
-        Box() {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-    } else {
+//    if (isLoading) {
+//        Box() {
+//            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+//        }
+//    } else {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -140,5 +140,5 @@ fun EventCard(eventDTO: EventDTO,
         }
     }
 
-}
+//}
 

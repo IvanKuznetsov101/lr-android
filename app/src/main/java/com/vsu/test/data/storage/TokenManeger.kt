@@ -1,4 +1,4 @@
-package com.vsu.test.data
+package com.vsu.test.data.storage
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext

@@ -2,8 +2,6 @@ package com.vsu.test.di
 
 import android.content.ContentResolver
 import android.content.Context
-import android.util.Log
-import coil.Coil
 import coil.ImageLoader
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -11,11 +9,11 @@ import com.google.gson.JsonDeserializer
 import com.vsu.test.data.api.ProfileService
 import com.vsu.test.BuildConfig
 import com.vsu.test.data.TokenAuthenticator
-import com.vsu.test.data.TokenManager
 import com.vsu.test.data.api.AuthService
 import com.vsu.test.data.api.EventService
 import com.vsu.test.data.api.ImageService
 import com.vsu.test.data.api.LightRoomService
+import com.vsu.test.data.api.VisitorService
 import com.vsu.test.data.interceptors.AuthInterceptor
 import dagger.Module
 import dagger.Provides
@@ -138,6 +136,10 @@ object NetworkModule {
     fun provideContentResolver(@ApplicationContext context: Context): ContentResolver {
         return context.contentResolver
     }
+    @Provides
+    @Singleton
+    fun provideVisitorService(@Named("MainRetrofit") retrofit: Retrofit) =
+        retrofit.create(VisitorService::class.java)
 
 
 }
