@@ -52,6 +52,8 @@ import com.vsu.test.presentation.ui.components.ListItem
 import com.vsu.test.presentation.ui.components.LocationButton
 import com.vsu.test.presentation.viewmodel.EventViewModel
 import com.vsu.test.presentation.viewmodel.MapViewModel
+import com.vsu.test.presentation.viewmodel.ProfileViewModel
+import com.vsu.test.utils.TimeUtils
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraListener
@@ -70,6 +72,7 @@ import kotlinx.coroutines.launch
 fun MapScreen(onNavigateToMore:() -> Unit) {
     val context = LocalContext.current
     val viewModel: MapViewModel = hiltViewModel()
+    val profileViewModel: ProfileViewModel = hiltViewModel()
     val eventViewModel: EventViewModel = hiltViewModel()
     val mapView = remember { MapView(context) }
     val imageProvider = ImageProvider.fromResource(context, R.drawable.ic_lightroom)
@@ -108,6 +111,7 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
         selectedLightRoomDTO = mapObject.userData as? LightRoomDTO
         true
     }
+    val isLoading by eventViewModel.loading.collectAsState()
 
     LaunchedEffect(points) {
         placemarkCollection.clear()
@@ -135,25 +139,27 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
 
+        val eventWithDetails by eventViewModel.eventWithDetails.collectAsState()
+
         selectedLightRoomDTO?.let { lightRoomDTO ->
-            LightRoomBottomSheetHandler(initialEventData = null,
-                lightRoomDTO = lightRoomDTO,
-                eventViewModel = eventViewModel,
-                onDismiss = { selectedLightRoomDTO = null })
-//            ModalBottomSheet(
-//                onDismissRequest = { selectedLightRoomDTO = null },
-//                sheetState = lightRoomSheetState
-//            ) {
-//                eventViewModel.getEventByLightRoomId(lightRoomDTO.id)
-//                if (isLoading) {
-//                    Box(Modifier.fillMaxWidth()) {
-//                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-//                    }
-//                } else{
-//                    val eventWithLightRoom = EventWithLightRoomData(event = event, lightRoom = lightRoomDTO)
-//                    LightRoomBottomSheetContent(eventWithLightRoom)
-//                }
-//            }
+            LaunchedEffect(lightRoomDTO) {
+                eventViewModel.getEventWithDetailsByLightRoom(lightRoomDTO)
+            }
+        }
+
+        eventWithDetails?.let { details ->
+            if(selectedLightRoomDTO!= null){
+                LightRoomBottomSheetHandler(
+                    eventWithDetails = details,
+                    eventViewModel = eventViewModel,
+                    profileViewModel = profileViewModel,
+                    onDismiss = {
+                        selectedLightRoomDTO = null
+                    },
+                    endsAfter = TimeUtils.formatTimeDifference(details.lightRoom.startTime)
+                )
+            }
+
         }
 
         MapControls(

@@ -41,20 +41,12 @@ fun EventCard(imagesUrls: List<String>,
               eventDTO: EventDTO,
               textOnButton: String,
               eventViewModel: EventViewModel,
-              visitorCount: Int,
+              visitorCount: Long,
               onClickButton: ()-> Unit,
-              onClickCard: ()-> Unit)
+              onClickCard: ()-> Unit,
+              endsAfter: String)
+
 {
-
-//    val isLoading by eventViewModel.loading.collectAsState(initial = false)
-    val event by eventViewModel.event.collectAsState()
-
-
-//    if (isLoading) {
-//        Box() {
-//            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-//        }
-//    } else {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -121,7 +113,7 @@ fun EventCard(imagesUrls: List<String>,
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "ends after: 999 hours",
+                        text = "ends after: $endsAfter",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )

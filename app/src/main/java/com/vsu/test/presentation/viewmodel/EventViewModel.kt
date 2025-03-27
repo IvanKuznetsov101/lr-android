@@ -7,11 +7,14 @@ import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.data.api.model.dto.EventDTO
+import com.vsu.test.data.api.model.dto.LightRoomDTO
+import com.vsu.test.domain.model.EventWithDetails
 import com.vsu.test.domain.usecase.CreateEventUseCase
 import com.vsu.test.domain.usecase.CreateLightRoomUseCase
 import com.vsu.test.domain.usecase.DeleteEventUseCase
 import com.vsu.test.domain.usecase.EventUseCase
 import com.vsu.test.domain.usecase.GetEventByLightRoomIdUseCase
+import com.vsu.test.domain.usecase.GetEventWithDetailsByLightRoomIdUseCase
 import com.vsu.test.domain.usecase.GetImagesUrlsByEventIdUseCase
 import com.vsu.test.domain.usecase.UpdateEventUseCase
 import com.vsu.test.domain.usecase.UpdateImagesUseCase
@@ -36,33 +39,51 @@ class EventViewModel @Inject constructor(
     private val getImagesUrlsByEventIdUseCase: GetImagesUrlsByEventIdUseCase,
     private val getEventByLightRoomIdUseCase: GetEventByLightRoomIdUseCase,
     val imageLoader: ImageLoader,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val getEventWithDetailsByLightRoomIdUseCase: GetEventWithDetailsByLightRoomIdUseCase
 ) : ViewModel() {
     val events = MutableStateFlow<List<EventDTO>>(emptyList())
     val event = MutableStateFlow<EventDTO>(EventDTO(0, null, null, null))
     val loading = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
 
-    private val _imagesByEvent = MutableStateFlow<Map<Long, List<String>>>(emptyMap())
-    val imagesByEvent: StateFlow<Map<Long, List<String>>> = _imagesByEvent
+    private  val _eventWithDetails = MutableStateFlow<EventWithDetails?>(null)
+    val eventWithDetails: StateFlow<EventWithDetails?> = _eventWithDetails
 
-    fun getImagesByEventId(eventId: Long) {
+//    private val _imagesByEvent = MutableStateFlow<Map<Long, List<String>>>(emptyMap())
+//    val imagesByEvent: StateFlow<Map<Long, List<String>>> = _imagesByEvent
+
+//    fun getImagesByEventId(eventId: Long) {
+//        viewModelScope.launch {
+//            loading.value = true
+//            try {
+//                val response = getImagesUrlsByEventIdUseCase.invoke(eventId)
+//                if (response is NetworkResult.Success) {
+//                    val images = response.data ?: emptyList()
+//                    _imagesByEvent.value = _imagesByEvent.value + (eventId to images)
+//                } else if (response is NetworkResult.Error) {
+//                    error.value = response.message
+//                }
+//            } catch (e: Exception) {
+//                error.value = e.message
+//            } finally {
+//                loading.value = false
+//            }
+//        }
+//    }
+
+    fun getEventWithDetailsByLightRoom(lightRoomDTO: LightRoomDTO) {
         viewModelScope.launch {
-            loading.value = true
             try {
-                val response = getImagesUrlsByEventIdUseCase.invoke(eventId)
-                if (response is NetworkResult.Success) {
-                    val images = response.data ?: emptyList()
-                    _imagesByEvent.value = _imagesByEvent.value + (eventId to images)
-                } else if (response is NetworkResult.Error) {
-                    error.value = response.message
-                }
+                loading.value = true
+                _eventWithDetails.value = getEventWithDetailsByLightRoomIdUseCase.invoke(lightRoomDTO)
             } catch (e: Exception) {
                 error.value = e.message
             } finally {
                 loading.value = false
             }
         }
+
     }
 
     fun loadEvents(id: Long? = tokenManager.getId()) {
@@ -93,25 +114,7 @@ class EventViewModel @Inject constructor(
                 val response = createEventUseCase.invoke(tokenManager.getId(), eventDTO, true)
                 loadEvents()
 
-                if(response is NetworkResult.Error) {
-                    error.value = response.message
-                    Log.e("EventViewModel", "Ошибка создания события: ${response.message}")
-                }
-            } catch (e: Exception) {
-                error.value = e.message
-                Log.e("EventViewModel", "Исключение при создании: ${e.message}")
-            } finally {
-                loading.value = false
-            }
-        }
-    }
-    fun updateEvent(eventDTO: EventDTO, images: List<Uri>) {
-        viewModelScope.launch {
-            loading.value = true
-            try {
-                val response = updateEventUseCase.invoke(tokenManager.getId(), eventDTO, true)
-                loadEvents()
-                if(response is NetworkResult.Error) {
+                if (response is NetworkResult.Error) {
                     error.value = response.message
                     Log.e("EventViewModel", "Ошибка создания события: ${response.message}")
                 }
@@ -124,24 +127,59 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    fun createEventAndCreateLightRoom(eventDTO: EventDTO, userCoordinates: Point?, images: List<Uri>) {
+    fun updateEvent(eventDTO: EventDTO, images: List<Uri>) {
+        viewModelScope.launch {
+            loading.value = true
+            try {
+                val response = updateEventUseCase.invoke(tokenManager.getId(), eventDTO, true)
+                loadEvents()
+                if (response is NetworkResult.Error) {
+                    error.value = response.message
+                    Log.e("EventViewModel", "Ошибка создания события: ${response.message}")
+                }
+            } catch (e: Exception) {
+                error.value = e.message
+                Log.e("EventViewModel", "Исключение при создании: ${e.message}")
+            } finally {
+                loading.value = false
+            }
+        }
+    }
+
+    fun createEventAndCreateLightRoom(
+        eventDTO: EventDTO,
+        userCoordinates: Point?,
+        images: List<Uri>
+    ) {
         viewModelScope.launch {
             loading.value = true
             try {
                 val response = createEventUseCase.invoke(tokenManager.getId(), eventDTO, true)
-                val imageResponse = uploadImagesUseCase.invoke(images = images, eventId = response.data?.id, profileId = null)
+                val imageResponse = uploadImagesUseCase.invoke(
+                    images = images,
+                    eventId = response.data?.id,
+                    profileId = null
+                )
                 if (response is NetworkResult.Success) {
                     val createdEvent = response.data ?: eventDTO.copy(id = 0L)
-                    uploadImagesUseCase.invoke(images = images, eventId = eventDTO.id, profileId = null)
+                    uploadImagesUseCase.invoke(
+                        images = images,
+                        eventId = eventDTO.id,
+                        profileId = null
+                    )
                     val lightRoomResponse = createLightRoomUseCase.invoke(
                         userCoordinates!!.latitude,
                         userCoordinates.longitude,
-                        createdEvent.id.takeIf { it != 0L } ?: throw IllegalStateException("ID события не получен")
+                        createdEvent.id.takeIf { it != 0L }
+                            ?: throw IllegalStateException("ID события не получен")
                     )
                     loadEvents()
                     if (lightRoomResponse is NetworkResult.Error) {
                         error.value = "Ошибка создания LightRoom"
-                        Log.e("EventViewModel", "Ошибка создания LightRoom: ${lightRoomResponse.message}")
+                        Log.e(
+                            "EventViewModel",
+                            "Ошибка создания LightRoom: ${lightRoomResponse.message}"
+                        )
                     }
                 } else {
                     error.value = response.message
@@ -156,12 +194,20 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    fun updateEventAndCreateLightRoom(eventDTO: EventDTO,images: List<Uri>, userCoordinates: Point?) {
+    fun updateEventAndCreateLightRoom(
+        eventDTO: EventDTO,
+        images: List<Uri>,
+        userCoordinates: Point?
+    ) {
         viewModelScope.launch {
             loading.value = true
             try {
                 val response = updateEventUseCase.invoke(tokenManager.getId(), eventDTO, true)
-                val imageResponse = updateImagesUseCase.invoke(images = images, eventId = eventDTO.id, profileId = null)
+                val imageResponse = updateImagesUseCase.invoke(
+                    images = images,
+                    eventId = eventDTO.id,
+                    profileId = null
+                )
                 if (response is NetworkResult.Success) {
                     val lightRoomResponse = createLightRoomUseCase.invoke(
                         userCoordinates!!.latitude,
@@ -171,7 +217,10 @@ class EventViewModel @Inject constructor(
                     loadEvents()
                     if (lightRoomResponse is NetworkResult.Error) {
                         error.value = "Ошибка обновления LightRoom"
-                        Log.e("EventViewModel", "Ошибка обновления LightRoom: ${lightRoomResponse.message}")
+                        Log.e(
+                            "EventViewModel",
+                            "Ошибка обновления LightRoom: ${lightRoomResponse.message}"
+                        )
                     }
                 } else {
                     error.value = response.message
@@ -205,13 +254,14 @@ class EventViewModel @Inject constructor(
             }
         }
     }
+
     fun getEventByLightRoomId(lightRoomId: Long) {
         viewModelScope.launch {
             loading.value = true
             try {
                 val response = getEventByLightRoomIdUseCase.invoke(lightRoomId)
                 if (response is NetworkResult.Success) {
-                    event.value = response.data?: EventDTO(0, null, null,null )
+                    event.value = response.data ?: EventDTO(0, null, null, null)
                     Log.d("EventViewModel", "Ивент загружен: ${event.value.id}")
                 } else if (response is NetworkResult.Error) {
                     error.value = response.message

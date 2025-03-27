@@ -29,7 +29,7 @@ class EventRepository @Inject constructor(
     suspend fun deleteEvent(id: Long): NetworkResult<EventDTO>{
         return safeApiCall { eventService.deleteEvent(id = id) }
     }
-    suspend fun getEventByLightRoomIdEvent(lightRoomId: Long): NetworkResult<EventDTO>{
+    suspend fun getEventByLightRoomId(lightRoomId: Long): NetworkResult<EventDTO>{
         return safeApiCall { eventService.getEventByLightRoomId(lightRoomId = lightRoomId) }
     }
 }

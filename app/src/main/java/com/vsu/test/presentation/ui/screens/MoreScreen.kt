@@ -1,55 +1,37 @@
 package com.vsu.test.presentation.ui.screens
 
-import android.Manifest
+import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.vsu.test.MainActivity
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.vsu.test.R
 import com.vsu.test.data.api.model.dto.EventDTO
-import com.vsu.test.data.api.model.dto.LightRoomDTO
+import com.vsu.test.domain.model.EventWithDetails
 import com.vsu.test.domain.model.EventWithLightRoomData
 import com.vsu.test.domain.usecase.MoreState
 import com.vsu.test.presentation.ui.components.CombinedActions
@@ -57,14 +39,17 @@ import com.vsu.test.presentation.ui.components.EventCard
 import com.vsu.test.presentation.ui.components.LightRoomBottomSheetHandler
 import com.vsu.test.presentation.viewmodel.EventViewModel
 import com.vsu.test.presentation.viewmodel.MoreViewModel
-import com.vsu.test.service.LocationService
+import com.vsu.test.presentation.viewmodel.ProfileViewModel
+import com.vsu.test.utils.TimeUtils
 
 @Composable
 fun MoreScreen(
     viewModel: MoreViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit,
-    onNavigateToMap: () -> Unit
+    onNavigateToMap: () -> Unit,
+    onNavigateToProfile:() -> Unit
 ) {
 
     val context = LocalContext.current
@@ -95,7 +80,11 @@ fun MoreScreen(
                 fontSize = 24.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ContentBox(state = state, viewModel = viewModel, eventViewModel = eventViewModel, context = context)
+            ContentBox(state = state,
+                viewModel = viewModel,
+                eventViewModel = eventViewModel,
+                profileViewModel = profileViewModel,
+                context = context)
             Spacer(modifier = Modifier.height(16.dp))
         }
         CombinedActions(
@@ -115,9 +104,9 @@ private fun ContentBox(
     state: MoreState,
     viewModel: MoreViewModel,
     eventViewModel: EventViewModel,
+    profileViewModel: ProfileViewModel,
     context: Context
 ) {
-    val imagesByEvent by eventViewModel.imagesByEvent.collectAsState()
     Box(
         modifier = Modifier
             .height(700.dp)
@@ -130,22 +119,31 @@ private fun ContentBox(
             when (state) {
                 is MoreState.UserEvent -> {
                     EventCard(
-                        imagesUrls = imagesByEvent[state.eventWithLightRoom.event.id] ?: emptyList(),
-                        eventDTO = state.eventWithLightRoom.event,
+                        imagesUrls = state.eventWithDetails.eventImagesUrls ?: emptyList(),
+                        eventDTO = state.eventWithDetails.event,
                         textOnButton = "Delete",
                         eventViewModel = eventViewModel,
-                        visitorCount = 999,
+                        visitorCount = state.eventWithDetails.visitorsCount,
                         onClickButton = {
-                            viewModel.deleteLightRoomById(state.eventWithLightRoom.lightRoom.id, context)
+                            viewModel.deleteLightRoomById(state.eventWithDetails.lightRoom.id, context)
                         },
-                        onClickCard = {}
+                        onClickCard = {},
+                        endsAfter = TimeUtils.formatTimeDifference(state.eventWithDetails.lightRoom.startTime)
                     )
                 }
                 is MoreState.EventsInRadius -> {
-                    EventCarouselScreen(eventsWithLightRooms = state.eventsWithLightRoom, eventViewModel = eventViewModel, moreViewModel = viewModel, context = context)
+                    EventCarouselScreen(
+                        eventsWithDetails = state.eventsWithDetails,
+                        eventViewModel = eventViewModel,
+                        profileViewModel = profileViewModel,
+                        moreViewModel = viewModel,
+                        context = context)
                 }
                 is MoreState.NoEvents -> {
                     PlaceholderContent()
+                }
+                is MoreState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
             }
         }
@@ -154,47 +152,57 @@ private fun ContentBox(
 
 @Composable
 private fun EventCarouselScreen(
-    eventsWithLightRooms: List<EventWithLightRoomData>,
+    eventsWithDetails: List<EventWithDetails>,
     eventViewModel: EventViewModel,
+    profileViewModel: ProfileViewModel,
     moreViewModel: MoreViewModel,
     context: Context
 ) {
-    val pagerState = rememberPagerState { eventsWithLightRooms.size }
+    val pagerState = rememberPagerState { eventsWithDetails.size }
     var isSheetOpen by remember { mutableStateOf(false) }
     var selectedEvent by remember { mutableStateOf<EventDTO?>(null) }
 
-    val imagesByEvent by eventViewModel.imagesByEvent.collectAsState()
 
+    val eventsWithDetailsState = remember { mutableStateListOf(*eventsWithDetails.toTypedArray()) }
 
-    LaunchedEffect(eventsWithLightRooms) {
-        eventsWithLightRooms.forEach { eventWithLightRoom ->
-            eventViewModel.getImagesByEventId(eventWithLightRoom.event.id)
-        }
-    }
     HorizontalPager(
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->
-        val eventWithLightRoom = eventsWithLightRooms[page]
-        EventCard(
-            imagesUrls = imagesByEvent[eventWithLightRoom.event.id] ?: emptyList(),
-            eventDTO = eventWithLightRoom.event,
-            textOnButton = "Join",
-            eventViewModel = eventViewModel,
-            visitorCount = 999,
-            onClickButton = { moreViewModel.createVisitor(eventWithLightRoom.lightRoom.id, context) },
-            onClickCard = { isSheetOpen = true
-                            selectedEvent = eventWithLightRoom.event}
-        )
-        if (isSheetOpen)
-            LightRoomBottomSheetHandler(
-                initialEventData = eventWithLightRoom,
-                lightRoomDTO = null,
-                eventViewModel = eventViewModel,
-                onDismiss = { isSheetOpen = false }
-            )
-    }
+        val eventWithDetails = eventsWithDetailsState[page]
+        val textOnButton = if (!eventWithDetails.isHere) "Join" else ""
+        val onClick: () -> Unit = if (!eventWithDetails.isHere) {
+            {
+                moreViewModel.createVisitor(eventWithDetails.lightRoom, context)
+                eventsWithDetailsState[page] = eventWithDetails.copy(isHere = true) //todo
+            }
+        } else {
+            {}
+        }
 
+        EventCard(
+            imagesUrls = eventWithDetails.eventImagesUrls ?: emptyList(),
+            eventDTO = eventWithDetails.event,
+            textOnButton = textOnButton,
+            eventViewModel = eventViewModel,
+            visitorCount = eventWithDetails.visitorsCount,
+            onClickButton = onClick,
+            onClickCard = {
+                isSheetOpen = true
+                selectedEvent = eventWithDetails.event
+            },
+            endsAfter = TimeUtils.formatTimeDifference(eventWithDetails.lightRoom.startTime)
+        )
+        if (isSheetOpen) {
+            LightRoomBottomSheetHandler(
+                eventWithDetails = eventWithDetails,
+                profileViewModel = profileViewModel,
+                eventViewModel = eventViewModel,
+                onDismiss = { isSheetOpen = false },
+                endsAfter = TimeUtils.formatTimeDifference(eventWithDetails.lightRoom.startTime)
+            )
+        }
+    }
 }
 
 @Composable

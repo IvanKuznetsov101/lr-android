@@ -27,6 +27,10 @@ import com.yandex.mapkit.MapKitFactory
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import android.app.ActivityManager
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.vsu.test.presentation.ui.screens.EditProfileScreen
+import com.vsu.test.presentation.ui.screens.ProfileScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -41,13 +45,13 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val authState by tokenManager.authState.collectAsState()
                 val startDestination = if (tokenManager.isLoggedIn()) {
-                    Screen.Map.route
+                    Screen.Map.route()
                 } else {
-                    Screen.Login.route
+                    Screen.Login.route()
                 }
                 LaunchedEffect(authState) {
                     if (!authState) {
-                        navController.navigate(Screen.Login.route) {
+                        navController.navigate(Screen.Login.route()) {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     }
@@ -56,41 +60,66 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     startDestination = startDestination
                 ) {
-                    composable(Screen.Login.route) {
+                    composable(Screen.Login.route()) {
                         LoginScreen(
                             onLoginSuccess = {
-                                navController.navigate(Screen.Map.route) {
-                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                navController.navigate(Screen.Map.route()) {
+                                    popUpTo(Screen.Login.route()) { inclusive = true }
                                 }
                             },
                             onNavigateToRegistration = {
-                                navController.navigate(Screen.Registration.route)
+                                navController.navigate(Screen.Registration.route())
                             }
                         )
                     }
-                    composable(Screen.Registration.route) {
+                    composable(Screen.Registration.route()) {
                         RegistrationScreen(
-                            onNavigateToLogin = { navController.navigate(Screen.Login.route) }
+                            onNavigateToLogin = { navController.navigate(Screen.Login.route()) }
                         )
                     }
-                    composable(Screen.Map.route) {
-                        MapScreen(onNavigateToMore = { navController.navigate(Screen.More.route) })
+                    composable(Screen.Map.route()) {
+                        MapScreen(onNavigateToMore = { navController.navigate(Screen.More.route()) })
                     }
-                    composable(Screen.More.route) {
+                    composable(Screen.More.route()) {
                         MoreScreen(
-                            onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
-                            onNavigateToMap = { navController.navigate(Screen.Map.route) }
+                            onNavigateToSettings = { navController.navigate(Screen.Settings.route()) },
+                            onNavigateToMap = { navController.navigate(Screen.Map.route()) },
+                            onNavigateToProfile = {
+                                val currentUserId = tokenManager.getId()
+                                navController.navigate(Screen.Profile.route(currentUserId))
+                            }
                         )
                     }
-                    composable(Screen.Settings.route) {
+                    composable(Screen.Settings.route()) {
                         SettingsScreen(
-                            onNavigateToAbout = { navController.navigate(Screen.About.route) },
-                            onNavigateToMore = { navController.navigate(Screen.More.route) },
+                            onNavigateToAbout = { navController.navigate(Screen.About.route()) },
+                            onNavigateToMore = { navController.navigate(Screen.More.route()) },
+                            navController = navController,
+                            tokenManager = tokenManager
                         )
                     }
-                    composable(Screen.About.route) {
+                    composable(Screen.About.route()) {
                         AboutScreen(
-                            onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                            onNavigateToSettings = { navController.navigate(Screen.Settings.route()) }
+                        )
+                    }
+                    composable(
+                        route = Screen.Profile.routePattern,
+                        arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val profileId = backStackEntry.arguments?.getString("userId")?.toLong() ?: return@composable
+                        val currentProfileId = tokenManager.getId()
+                        val isOwnProfile = profileId == currentProfileId
+                        ProfileScreen(
+                            profileId = profileId,
+                            isOwnProfile = isOwnProfile,
+                            onEditProfile = { navController.navigate(Screen.EditProfile.route()) }
+                        )
+                    }
+                    composable(route = Screen.EditProfile.route()) {
+                        EditProfileScreen(
+                            onBackClick = { navController.popBackStack() },
+                            onProfileUpdated = { navController.popBackStack() }
                         )
                     }
                 }
@@ -110,15 +139,10 @@ class MainActivity : ComponentActivity() {
         MapKitFactory.getInstance().onStop()
     }
 
-//    override fun onNewIntent(intent: Intent?) {
-//        super.onNewIntent(intent)
-//        handleIntent(intent, navController = rememberNavController()) // Используем Compose-навигацию
-//    }
-
     private fun handleIntent(intent: Intent?, navController: NavHostController) {
         intent?.let {
             if (it.getStringExtra("screen") == "more") {
-                navController.navigate(Screen.More.route)
+                navController.navigate(Screen.More.route())
             }
         }
     }
@@ -140,11 +164,43 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class Screen(val route: String) {
-    object Registration : Screen("registration")
-    object Map : Screen("map")
-    object Login : Screen("login")
-    object More : Screen("more")
-    object Settings : Screen("settings")
-    object About : Screen("about")
+sealed class Screen {
+    abstract val routePattern: String
+    open fun route(vararg args: Any): String = routePattern
+
+    object Registration : Screen() {
+        override val routePattern = "registration"
+    }
+
+    object Map : Screen() {
+        override val routePattern = "map"
+    }
+
+    object Login : Screen() {
+        override val routePattern = "login"
+    }
+
+    object More : Screen() {
+        override val routePattern = "more"
+    }
+
+    object Settings : Screen() {
+        override val routePattern = "settings"
+    }
+
+    object About : Screen() {
+        override val routePattern = "about"
+    }
+
+    object Profile : Screen() {
+        override val routePattern = "profile/{userId}"
+        override fun route(vararg args: Any): String {
+            require(args.size == 1 && args[0] is String) { "Profile requires userId: String" }
+            return "profile/${args[0]}"
+        }
+    }
+
+    object EditProfile : Screen() {
+        override val routePattern = "edit_profile"
+    }
 }

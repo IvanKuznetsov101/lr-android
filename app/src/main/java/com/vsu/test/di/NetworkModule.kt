@@ -13,6 +13,7 @@ import com.vsu.test.data.api.AuthService
 import com.vsu.test.data.api.EventService
 import com.vsu.test.data.api.ImageService
 import com.vsu.test.data.api.LightRoomService
+import com.vsu.test.data.api.ReviewService
 import com.vsu.test.data.api.VisitorService
 import com.vsu.test.data.interceptors.AuthInterceptor
 import dagger.Module
@@ -46,9 +47,9 @@ object NetworkModule {
         authInterceptor: AuthInterceptor,
         tokenAuthenticator: TokenAuthenticator
     ): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(httpLoggingInterceptor) // Логирует все запросы, включая Coil
-        .addInterceptor(authInterceptor) // Добавляет JWT-токен
-        .authenticator(tokenAuthenticator) // Обновляет токен при 401
+        .addInterceptor(httpLoggingInterceptor)
+        .addInterceptor(authInterceptor)
+        .authenticator(tokenAuthenticator)
         .build()
 
     @Provides
@@ -58,12 +59,11 @@ object NetworkModule {
         @ApplicationContext context: Context
     ): ImageLoader {
         return ImageLoader.Builder(context)
-            .okHttpClient(okHttpClient) // Используем существующий клиент без изменений
+            .okHttpClient(okHttpClient)
             .crossfade(true)
             .build()
     }
 
-    // OkHttpClient для аутентификации (без TokenAuthenticator)
     @Provides
     @Singleton
     @Named("AuthOkHttpClient")
@@ -73,39 +73,40 @@ object NetworkModule {
         .addInterceptor(httpLoggingInterceptor)
         .build()
 
-    // Основной Retrofit для всех сервисов, кроме AuthService
-    @Provides
-    @Singleton
-    @Named("MainRetrofit")
-    fun provideMainRetrofit(@Named("MainOkHttpClient") okHttpClient: OkHttpClient): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL_LOCAL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
-            .build()
-
-    // Retrofit для AuthService
-    @Provides
-    @Singleton
-    @Named("AuthRetrofit")
-    fun provideAuthRetrofit(@Named("AuthOkHttpClient") okHttpClient: OkHttpClient): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL_LOCAL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
-            .build()
-
     @Provides
     @Singleton
     fun provideGson(): Gson {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formatter = DateTimeFormatter.ISO_LOCAL_DATE // "yyyy-MM-dd"
         return GsonBuilder()
             .registerTypeAdapter(LocalDate::class.java, JsonDeserializer<LocalDate> { json, _, _ ->
                 LocalDate.parse(json.asString, formatter)
             })
-            .setDateFormat("yyyy-MM-dd")
             .create()
     }
+
+    @Provides
+    @Singleton
+    @Named("MainRetrofit")
+    fun provideMainRetrofit(
+        @Named("MainOkHttpClient") okHttpClient: OkHttpClient,
+        gson: Gson // Используем настроенный Gson
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.BASE_URL_LOCAL)
+        .addConverterFactory(GsonConverterFactory.create(gson)) // Передаем gson
+        .client(okHttpClient)
+        .build()
+
+    @Provides
+    @Singleton
+    @Named("AuthRetrofit")
+    fun provideAuthRetrofit(
+        @Named("AuthOkHttpClient") okHttpClient: OkHttpClient,
+        gson: Gson // Используем настроенный Gson
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.BASE_URL_LOCAL)
+        .addConverterFactory(GsonConverterFactory.create(gson)) // Передаем gson
+        .client(okHttpClient)
+        .build()
 
     @Provides
     @Singleton
@@ -114,32 +115,36 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideProfileService(@Named("MainRetrofit") retrofit: Retrofit) =
+    fun provideProfileService(@Named("MainRetrofit") retrofit: Retrofit): ProfileService =
         retrofit.create(ProfileService::class.java)
 
     @Provides
     @Singleton
-    fun provideLightRoomService(@Named("MainRetrofit") retrofit: Retrofit) =
+    fun provideLightRoomService(@Named("MainRetrofit") retrofit: Retrofit): LightRoomService =
         retrofit.create(LightRoomService::class.java)
 
     @Provides
     @Singleton
-    fun provideEventService(@Named("MainRetrofit") retrofit: Retrofit) =
+    fun provideEventService(@Named("MainRetrofit") retrofit: Retrofit): EventService =
         retrofit.create(EventService::class.java)
 
     @Provides
     @Singleton
-    fun provideImageService(@Named("MainRetrofit") retrofit: Retrofit) =
+    fun provideImageService(@Named("MainRetrofit") retrofit: Retrofit): ImageService =
         retrofit.create(ImageService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideVisitorService(@Named("MainRetrofit") retrofit: Retrofit): VisitorService =
+        retrofit.create(VisitorService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideReviewService(@Named("MainRetrofit") retrofit: Retrofit): ReviewService =
+        retrofit.create(ReviewService::class.java)
 
     @Provides
     fun provideContentResolver(@ApplicationContext context: Context): ContentResolver {
         return context.contentResolver
     }
-    @Provides
-    @Singleton
-    fun provideVisitorService(@Named("MainRetrofit") retrofit: Retrofit) =
-        retrofit.create(VisitorService::class.java)
-
-
 }

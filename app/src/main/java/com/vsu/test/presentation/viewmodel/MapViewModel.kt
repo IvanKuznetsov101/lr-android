@@ -105,6 +105,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
+
     /** Перемещение камеры к местоположению пользователя */
     private fun cameraUserPosition() {
         mapView?.let {

@@ -11,7 +11,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.vsu.test.Screen
+import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.presentation.ui.components.BackButton
 import com.vsu.test.presentation.ui.components.DefaultButton
 import com.vsu.test.presentation.ui.components.LocationTrackingSwitch
@@ -19,7 +22,9 @@ import com.vsu.test.presentation.viewmodel.SettingsViewModel
 
 @Composable
 fun SettingsScreen(onNavigateToAbout: () -> Unit,
-                   onNavigateToMore: () -> Unit
+                   onNavigateToMore: () -> Unit,
+                   navController: NavController,
+                   tokenManager: TokenManager
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     Box(modifier = Modifier
@@ -38,7 +43,9 @@ fun SettingsScreen(onNavigateToAbout: () -> Unit,
                 fontSize = 24.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            DefaultButton(onClick = {},text = "Account")
+            DefaultButton(onClick = {
+                val currentUserId = tokenManager.getId().toString()
+                navController.navigate(Screen.Profile.route(currentUserId)) },text = "Account")
             Spacer(modifier = Modifier.height(16.dp))
             DefaultButton(onClick = {onNavigateToAbout()},text = "About")
             Spacer(modifier = Modifier.height(16.dp))

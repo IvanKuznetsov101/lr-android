@@ -61,7 +61,7 @@ fun CRUDEvent(
             steps = 99
         )
 
-        PhotoPicker { images -> selectedImages = images } // Передаём колбэк
+        PhotoPicker { images -> selectedImages = images }
     }
     Box(modifier = Modifier.fillMaxSize()) {
         CombinedActions(

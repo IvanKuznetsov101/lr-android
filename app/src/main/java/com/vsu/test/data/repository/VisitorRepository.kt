@@ -18,4 +18,10 @@ class VisitorRepository @Inject constructor(
     suspend fun updateEndTimeVisitor(visitorId: Long): NetworkResult<VisitorDTO>{
         return safeApiCall { visitorService.updateEndTimeVisitor(visitorId) }
     }
+    suspend fun getCurrentVisitorByProfileId(profileId: Long): NetworkResult<VisitorDTO>{
+        return safeApiCall { visitorService.getVisitorByProfileId(profileId) }
+    }
+    suspend fun getVisitorCountByLightRoomId(lightRoomId: Long): NetworkResult<Long>{
+        return safeApiCall { visitorService.getVisitorCountByLightRoomId(lightRoomId)}
+    }
 }

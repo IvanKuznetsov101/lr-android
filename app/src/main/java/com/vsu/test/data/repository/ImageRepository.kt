@@ -23,6 +23,9 @@ class ImageRepository @Inject constructor(
     suspend fun getImagesUrlsByEventId(eventId: Long): NetworkResult<List<String>> {
         return safeApiCall { imageService.getImagesUrlsByEvent(eventId) }
     }
+    suspend fun getImageUrlByProfileId(profileId: Long): NetworkResult<String>{
+        return safeApiCall { imageService.getImagesByProfile(profileId) }
+    }
     suspend fun uploadImages(
         images: List<Uri>,
         profileId: Long?,
@@ -43,17 +46,14 @@ class ImageRepository @Inject constructor(
     ): Any {
         val parts = images.mapNotNull { uri ->
             try {
-                // 1. Получаем имя файла и MIME-тип
+
                 val fileName = getFileNameFromUri(uri) ?: "image_${System.currentTimeMillis()}"
                 val mimeType = contentResolver.getType(uri) ?: "image/*"
-
-                // 2. Создаем RequestBody через InputStream
                 contentResolver.openInputStream(uri)?.use { inputStream ->
                     val requestBody = inputStream.readBytes().toRequestBody(
                         mimeType.toMediaTypeOrNull()
                     )
 
-                    // 3. Создаем Multipart часть
                     MultipartBody.Part.createFormData(
                         "images",
                         fileName,
@@ -75,7 +75,6 @@ class ImageRepository @Inject constructor(
         }
     }
 
-    // Функция для получения имени файла из Uri
     private fun getFileNameFromUri(uri: Uri): String? {
         return when (uri.scheme) {
             "content" -> {
