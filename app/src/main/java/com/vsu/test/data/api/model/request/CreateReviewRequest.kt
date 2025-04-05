@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 data class CreateReviewRequest(
     @SerializedName("from_user_id")
-    val fromUserId: Long,
+    val fromProfileId: Long,
     @SerializedName("to_user_id")
-    val toUserId: Long,
+    val toProfileId: Long,
     @SerializedName("text")
     val text: String,
     @SerializedName("rating")

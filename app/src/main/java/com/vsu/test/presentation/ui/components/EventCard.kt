@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -22,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -47,89 +50,100 @@ fun EventCard(imagesUrls: List<String>,
               endsAfter: String)
 
 {
-        Card(
+    Card(
+        modifier = Modifier.fillMaxSize(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        onClick = { onClickCard() }
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            onClick = { onClickCard() }
+                .fillMaxSize()
+                .background(Color.White)
         ) {
+            // Изображение занимает все доступное место
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f) // Растягиваем только в доступное пространство
+            ) {
+                AsyncImage(
+                    model = imagesUrls.firstOrNull() ?: R.drawable.placeholder,
+                    contentDescription = "Изображение мероприятия",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.placeholder),
+                    error = painterResource(R.drawable.placeholder),
+                    imageLoader = eventViewModel.imageLoader
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.White)
+                            )
+                        )
+                )
+            }
+
+            // Контент
             Column(
                 modifier = Modifier
+                    .padding(16.dp)
                     .fillMaxWidth()
-                    .background(Color.White)
+
             ) {
-                Box {
-                    AsyncImage(
-                        model = imagesUrls.firstOrNull() ?: R.drawable.placeholder,
-                        contentDescription = "Изображение мероприятия",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.placeholder),
-                        error = painterResource(R.drawable.placeholder),
-                        imageLoader = eventViewModel.imageLoader
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(80.dp)
-                            .align(Alignment.BottomCenter)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(Color.Transparent, Color.White)
-                                )
-                            )
-                    )
-                }
+                Text(
+                    text = eventDTO.title.toString(),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = eventDTO.title.toString(),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Text(
+                    text = "$visitorCount people",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Gray
+                )
 
-                    Text(
-                        text = "$visitorCount people",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.Gray
-                    )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = eventDTO.description.toString(),
+                    maxLines = 6, // Ограничение по количеству строк
+                    overflow = TextOverflow.Ellipsis, // Добавляет ... если текст длинный
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
 
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = eventDTO.description.toString(),
-                        maxLines = 6, // Ограничение по количеству строк
-                        overflow = TextOverflow.Ellipsis, // Добавляет ... если текст длинный
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
+                Text(
+                    text = "ends after: $endsAfter",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "ends after: $endsAfter",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    DefaultButton(
                         onClick = { onClickButton() },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
-                    ) {
-                        Text(text = textOnButton, color = Color.White)
-                    }
+                        text = textOnButton,
+                        icon = null
+                    )
                 }
+
             }
         }
+    }
     }
 
 //}

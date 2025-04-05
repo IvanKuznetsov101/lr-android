@@ -31,6 +31,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.vsu.test.presentation.ui.screens.EditProfileScreen
 import com.vsu.test.presentation.ui.screens.ProfileScreen
+import com.vsu.test.presentation.ui.screens.ReviewScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -78,7 +79,9 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(Screen.Map.route()) {
-                        MapScreen(onNavigateToMore = { navController.navigate(Screen.More.route()) })
+                        MapScreen(
+                            onNavigateToMore = { navController.navigate(Screen.More.route()) },
+                            navController = navController)
                     }
                     composable(Screen.More.route()) {
                         MoreScreen(
@@ -87,7 +90,8 @@ class MainActivity : ComponentActivity() {
                             onNavigateToProfile = {
                                 val currentUserId = tokenManager.getId()
                                 navController.navigate(Screen.Profile.route(currentUserId))
-                            }
+                            },
+                            navController = navController
                         )
                     }
                     composable(Screen.Settings.route()) {
@@ -105,21 +109,34 @@ class MainActivity : ComponentActivity() {
                     }
                     composable(
                         route = Screen.Profile.routePattern,
-                        arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                        arguments = listOf(navArgument("profileId") { type = NavType.StringType })
                     ) { backStackEntry ->
-                        val profileId = backStackEntry.arguments?.getString("userId")?.toLong() ?: return@composable
+                        val profileId = backStackEntry.arguments?.getString("profileId")?.toLong() ?: return@composable
                         val currentProfileId = tokenManager.getId()
                         val isOwnProfile = profileId == currentProfileId
                         ProfileScreen(
                             profileId = profileId,
                             isOwnProfile = isOwnProfile,
-                            onEditProfile = { navController.navigate(Screen.EditProfile.route()) }
+                            onEditProfile = { navController.navigate(Screen.EditProfile.route()) },
+                            onBackButton = { navController.popBackStack() },
+                            navController = navController
                         )
                     }
                     composable(route = Screen.EditProfile.route()) {
                         EditProfileScreen(
                             onBackClick = { navController.popBackStack() },
                             onProfileUpdated = { navController.popBackStack() }
+                        )
+                    }
+                    composable(
+                        route = Screen.Reviews.routePattern,
+                        arguments = listOf(navArgument("profileId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val profileId = backStackEntry.arguments?.getString("profileId")?.toLong() ?: return@composable
+
+                        ReviewScreen(
+                            profileId = profileId,
+                            onBackClick = { navController.popBackStack() },
                         )
                     }
                 }
@@ -193,10 +210,17 @@ sealed class Screen {
     }
 
     object Profile : Screen() {
-        override val routePattern = "profile/{userId}"
+        override val routePattern = "profile/{profileId}"
         override fun route(vararg args: Any): String {
             require(args.size == 1 && args[0] is String) { "Profile requires userId: String" }
             return "profile/${args[0]}"
+        }
+    }
+    object Reviews : Screen() {
+        override val routePattern = "reviews/{profileId}"
+        override fun route(vararg args: Any): String {
+            require(args.size == 1 && args[0] is String) { "Profile requires userId: String" }
+            return "reviews/${args[0]}"
         }
     }
 

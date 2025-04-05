@@ -3,6 +3,11 @@ package com.vsu.test.presentation.ui.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,45 +32,54 @@ fun SettingsScreen(onNavigateToAbout: () -> Unit,
                    tokenManager: TokenManager
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(color = Color.White)){
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White)
+    ) {
+        // Заголовок сверху
+        Text(
+            text = "Settings",
+            fontSize = 24.sp,
+            modifier = Modifier
+                .align(Alignment.TopCenter) // Размещаем сверху
+                .padding(top = 32.dp) // Добавляем отступ сверху
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Center, // Центрируем содержимое (без заголовка)
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Settings",
-                fontSize = 24.sp
+            DefaultButton(
+                onClick = {
+                    val currentUserId = tokenManager.getId().toString()
+                    navController.navigate(Screen.Profile.route(currentUserId))
+                },
+                text = "Account",
+                icon = Icons.Default.Person
             )
             Spacer(modifier = Modifier.height(16.dp))
-            DefaultButton(onClick = {
-                val currentUserId = tokenManager.getId().toString()
-                navController.navigate(Screen.Profile.route(currentUserId)) },text = "Account")
+            DefaultButton(onClick = { onNavigateToAbout() }, text = "About", icon = Icons.Default.Info)
             Spacer(modifier = Modifier.height(16.dp))
-            DefaultButton(onClick = {onNavigateToAbout()},text = "About")
-            Spacer(modifier = Modifier.height(16.dp))
-            DefaultButton(onClick = {
-                viewModel.logout()
-            },text = "Logout")
+            DefaultButton(onClick = { viewModel.logout() }, text = "Logout", icon = Icons.Default.Logout)
             Spacer(modifier = Modifier.height(16.dp))
             LocationTrackingSwitch(
                 onServiceStateChanged = { enabled ->
                     Log.d("SettingsScreen", "Tracking state changed: $enabled")
-                    // Здесь можно добавить дополнительную логику, если нужно
                 }
             )
-
         }
+
+        // Кнопка "Назад" внизу справа
         BackButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .offset(x = 32.dp, y = (-40).dp),
-            button = {onNavigateToMore()}
+            button = { onNavigateToMore() }
         )
     }
 }

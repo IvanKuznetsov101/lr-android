@@ -2,6 +2,7 @@ package com.vsu.test.presentation.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,7 +13,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vsu.test.presentation.viewmodel.RegistrationViewModel
-import com.vsu.test.utils.NetworkResult
 import java.time.LocalDate
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.Icons
@@ -23,9 +23,10 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.vsu.test.domain.model.SignUpData
-import com.vsu.test.presentation.viewmodel.AuthViewModel
+import com.vsu.test.presentation.ui.components.DefaultButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +59,12 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             onValueChange = { fullName = it },
             label = { Text("Full Name") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            shape = RoundedCornerShape(32.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Black,
+                unfocusedIndicatorColor = Color.Gray
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -69,7 +75,12 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             onValueChange = { username = it },
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            shape = RoundedCornerShape(32.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Black,
+                unfocusedIndicatorColor = Color.Gray
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -81,7 +92,12 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            shape = RoundedCornerShape(32.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Black,
+                unfocusedIndicatorColor = Color.Gray
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -92,7 +108,12 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             onValueChange = { email = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            shape = RoundedCornerShape(32.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Black,
+                unfocusedIndicatorColor = Color.Gray
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -104,6 +125,11 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             label = { Text("Date of Birth") },
             modifier = Modifier.fillMaxWidth(),
             readOnly = true,
+            shape = RoundedCornerShape(32.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Black,
+                unfocusedIndicatorColor = Color.Gray
+            ),
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(
@@ -143,23 +169,38 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
         Spacer(modifier = Modifier.height(16.dp))
 
         // Кнопка "Register"
-        Button(
+        DefaultButton(
             onClick = {
                 coroutineScope.launch {
-                    val signUpData = SignUpData(fullName, username, password, email, dateOfBirth)
-                    viewModel.createProfile(signUpData)
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Register")
-        }
-        Button(
-            onClick = onNavigateToLogin,
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Открыть login ")
-        }
+                val signUpData = SignUpData(fullName, username, password, email, dateOfBirth)
+                viewModel.createProfile(signUpData)
+            } },
+            text = "Registration",
+            icon = null
+        )
+//        Button(
+//            onClick = {
+//                coroutineScope.launch {
+//                    val signUpData = SignUpData(fullName, username, password, email, dateOfBirth)
+//                    viewModel.createProfile(signUpData)
+//                }
+//            },
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Text("Register")
+//        }
+        Spacer(modifier = Modifier.height(16.dp))
+        DefaultButton(
+            onClick = { onNavigateToLogin()},
+            text = "Login",
+            icon = null
+        )
+//        Button(
+//            onClick = onNavigateToLogin,
+//            modifier = Modifier.padding(top = 16.dp)
+//        ) {
+//            Text("Открыть login ")
+//        }
 
         LaunchedEffect(Unit) {
             viewModel.registrationEvent.collect { event ->

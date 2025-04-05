@@ -1,6 +1,7 @@
 package com.vsu.test.data.api
 
 import com.vsu.test.data.api.model.dto.EventDTO
+import com.vsu.test.data.api.model.dto.LastEvent
 import com.vsu.test.data.api.model.request.EventRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -17,6 +18,9 @@ interface EventService {
 
     @GET("/api/events/profile/{profileId}")
     suspend fun getActualEventByProfileId(@Path("profileId") profileId: Long, @Query("type") type: String = "actual-event"): Response<EventDTO>
+
+    @GET("/api/events/profile/{profileId}")
+    suspend fun getLastEventsByProfileId(@Path("profileId") profileId: Long, @Query("type") type: String = "last-events"): Response<List<LastEvent>>
 
     @POST("/api/events")
     suspend fun createEvent(@Body eventRequest: EventRequest): Response<EventDTO>

@@ -25,6 +25,19 @@ object TimeUtils {
             "Ошибка формата даты"
         }
     }
+    fun formatTimeDifferenceNow(end: String): String {
+        return try {
+            val startDateTime = LocalDateTime.now(ZoneOffset.UTC) // Текущее время в UTC
+            val endDateTime = LocalDateTime.parse(fixNanoFormat(end), formatter)
+
+            val duration = Duration.between(endDateTime, startDateTime)
+            val days = duration.toDays()
+
+            "${days} days"
+        } catch (e: Exception) {
+            "Ошибка формата даты"
+        }
+    }
 
     private fun fixNanoFormat(dateTime: String): String {
         val parts = dateTime.split(".")

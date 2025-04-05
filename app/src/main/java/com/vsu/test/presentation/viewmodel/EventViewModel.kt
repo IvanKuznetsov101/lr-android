@@ -8,14 +8,17 @@ import coil.ImageLoader
 import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.LightRoomDTO
+import com.vsu.test.data.storage.VisitorInfo
+import com.vsu.test.data.storage.VisitorStorage
 import com.vsu.test.domain.model.EventWithDetails
 import com.vsu.test.domain.usecase.CreateEventUseCase
 import com.vsu.test.domain.usecase.CreateLightRoomUseCase
+import com.vsu.test.domain.usecase.CreateVisitorUseCase
 import com.vsu.test.domain.usecase.DeleteEventUseCase
 import com.vsu.test.domain.usecase.EventUseCase
 import com.vsu.test.domain.usecase.GetEventByLightRoomIdUseCase
 import com.vsu.test.domain.usecase.GetEventWithDetailsByLightRoomIdUseCase
-import com.vsu.test.domain.usecase.GetImagesUrlsByEventIdUseCase
+import com.vsu.test.domain.usecase.GetVisitorStateUseCase
 import com.vsu.test.domain.usecase.UpdateEventUseCase
 import com.vsu.test.domain.usecase.UpdateImagesUseCase
 import com.vsu.test.domain.usecase.UploadImagesUseCase
@@ -33,10 +36,12 @@ class EventViewModel @Inject constructor(
     private val createEventUseCase: CreateEventUseCase,
     private val updateEventUseCase: UpdateEventUseCase,
     private val deleteEventUseCase: DeleteEventUseCase,
+    private val createVisitorUseCase: CreateVisitorUseCase,
     private val createLightRoomUseCase: CreateLightRoomUseCase,
     private val uploadImagesUseCase: UploadImagesUseCase,
+    private val visitorStorage: VisitorStorage,
+    private val getVisitorStateUseCase: GetVisitorStateUseCase,
     private val updateImagesUseCase: UpdateImagesUseCase,
-    private val getImagesUrlsByEventIdUseCase: GetImagesUrlsByEventIdUseCase,
     private val getEventByLightRoomIdUseCase: GetEventByLightRoomIdUseCase,
     val imageLoader: ImageLoader,
     private val tokenManager: TokenManager,
@@ -49,28 +54,6 @@ class EventViewModel @Inject constructor(
 
     private  val _eventWithDetails = MutableStateFlow<EventWithDetails?>(null)
     val eventWithDetails: StateFlow<EventWithDetails?> = _eventWithDetails
-
-//    private val _imagesByEvent = MutableStateFlow<Map<Long, List<String>>>(emptyMap())
-//    val imagesByEvent: StateFlow<Map<Long, List<String>>> = _imagesByEvent
-
-//    fun getImagesByEventId(eventId: Long) {
-//        viewModelScope.launch {
-//            loading.value = true
-//            try {
-//                val response = getImagesUrlsByEventIdUseCase.invoke(eventId)
-//                if (response is NetworkResult.Success) {
-//                    val images = response.data ?: emptyList()
-//                    _imagesByEvent.value = _imagesByEvent.value + (eventId to images)
-//                } else if (response is NetworkResult.Error) {
-//                    error.value = response.message
-//                }
-//            } catch (e: Exception) {
-//                error.value = e.message
-//            } finally {
-//                loading.value = false
-//            }
-//        }
-//    }
 
     fun getEventWithDetailsByLightRoom(lightRoomDTO: LightRoomDTO) {
         viewModelScope.launch {
@@ -171,10 +154,18 @@ class EventViewModel @Inject constructor(
                         userCoordinates!!.latitude,
                         userCoordinates.longitude,
                         createdEvent.id.takeIf { it != 0L }
-                            ?: throw IllegalStateException("ID события не получен")
+                            ?: throw IllegalStateException("ID события не получено")
                     )
                     loadEvents()
-                    if (lightRoomResponse is NetworkResult.Error) {
+                    if (lightRoomResponse is NetworkResult.Success){
+                        val visitorResponse = lightRoomResponse.data?.let {
+                            createVisitorUseCase.invoke(tokenManager.getId(),
+                                it.id, visitorStorage.getVisitorId())
+                        }
+                        if (visitorResponse is NetworkResult.Success && visitorResponse.data != null){
+                            visitorStorage.saveVisitorInfo(VisitorInfo(visitorResponse.data.idVisitor, lightRoomResponse.data.id, tokenManager.getId()))
+                        }
+                    } else{
                         error.value = "Ошибка создания LightRoom"
                         Log.e(
                             "EventViewModel",
@@ -215,7 +206,23 @@ class EventViewModel @Inject constructor(
                         eventDTO.id
                     )
                     loadEvents()
-                    if (lightRoomResponse is NetworkResult.Error) {
+                    if (lightRoomResponse is NetworkResult.Success) {
+                        val visitorResponse = lightRoomResponse.data?.let {
+                            createVisitorUseCase.invoke(
+                                tokenManager.getId(),
+                                it.id, visitorStorage.getVisitorId()
+                            )
+                        }
+                        if (visitorResponse is NetworkResult.Success && visitorResponse.data != null) {
+                            visitorStorage.saveVisitorInfo(
+                                VisitorInfo(
+                                    visitorResponse.data.idVisitor,
+                                    lightRoomResponse.data.id,
+                                    tokenManager.getId()
+                                )
+                            )
+                        }
+                    } else {
                         error.value = "Ошибка обновления LightRoom"
                         Log.e(
                             "EventViewModel",
@@ -274,5 +281,13 @@ class EventViewModel @Inject constructor(
                 loading.value = false
             }
         }
+    }
+    fun checkProfileLightRoom(): Boolean{
+        return visitorStorage.getVisitorId()!=null
+//        viewModelScope.launch {
+//            val visitor = getVisitorStateUseCase.invoke()
+//            return@launch
+//        }
+
     }
 }

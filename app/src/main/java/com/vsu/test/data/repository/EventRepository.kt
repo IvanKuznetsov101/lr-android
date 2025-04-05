@@ -2,6 +2,7 @@ package com.vsu.test.data.repository
 
 import com.vsu.test.data.api.EventService
 import com.vsu.test.data.api.model.dto.EventDTO
+import com.vsu.test.data.api.model.dto.LastEvent
 import com.vsu.test.data.api.model.request.EventRequest
 import com.vsu.test.utils.BaseApiResponse
 import com.vsu.test.utils.NetworkResult
@@ -15,6 +16,9 @@ class EventRepository @Inject constructor(
     }
     suspend fun getActualEventByProfileId(id: Long): NetworkResult<EventDTO> {
         return safeApiCall { eventService.getActualEventByProfileId(profileId = id) }
+    }
+    suspend fun getLastEventsByProfileId(id: Long): NetworkResult<List<LastEvent>> {
+        return safeApiCall { eventService.getLastEventsByProfileId(profileId = id) }
     }
     suspend fun createEvent(profileId: Long, eventDTO: EventDTO): NetworkResult<EventDTO>{
         val eventRequest = EventRequest(title = eventDTO.title, description = eventDTO.description,

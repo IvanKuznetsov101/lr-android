@@ -1,5 +1,6 @@
 package com.vsu.test.presentation.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
@@ -10,6 +11,7 @@ import com.vsu.test.domain.model.ProfileWithImage
 import com.vsu.test.domain.usecase.GetProfileByIdUseCase
 import com.vsu.test.domain.usecase.GetProfileWithDetailsByIdUseCase
 import com.vsu.test.domain.usecase.MoreState
+import com.vsu.test.domain.usecase.UpdateImagesUseCase
 import com.vsu.test.domain.usecase.UpdateProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,11 +25,15 @@ class EditProfileViewModel @Inject constructor(
     val imageLoader: ImageLoader,
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val getProfileByIdUseCase: GetProfileByIdUseCase,
+    private val updateImagesUseCase: UpdateImagesUseCase,
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _editProfileState = MutableStateFlow<EditProfileState>(EditProfileState.Loading)
     val editProfileState: StateFlow<EditProfileState> = _editProfileState
+
+    private val _avatarUri = MutableStateFlow<Uri?>(null)
+    val avatarUri: StateFlow<Uri?> = _avatarUri
 
     init {
         loadProfileForEdit()
@@ -39,9 +45,8 @@ class EditProfileViewModel @Inject constructor(
             val profileId = tokenManager.getId()
             try {
                 val profile = getProfileByIdUseCase(profileId)
-                if(profile != null){
-                    _editProfileState.value = EditProfileState.Success(profile, profile)
-                }
+                _editProfileState.value = EditProfileState.Success(profile, profile, )
+
             } catch (e: Exception) {
                 _editProfileState.value = EditProfileState.Error("Ошибка загрузки: ${e.message}")
             }
@@ -56,6 +61,8 @@ class EditProfileViewModel @Inject constructor(
 
             try {
                 updateProfileUseCase.invoke(currentState.editedProfile.profile)
+                val uriList: List<Uri> = _avatarUri.value?.let { listOf(it) } ?: emptyList()
+                updateImagesUseCase.invoke(images = uriList, profileId = currentState.editedProfile.profile.id, eventId = null)
                 _editProfileState.value = EditProfileState.Success(
                     originalProfile = currentState.editedProfile,
                     editedProfile = currentState.editedProfile,
@@ -63,7 +70,7 @@ class EditProfileViewModel @Inject constructor(
                     isSaved = true
                 )
             } catch (e: Exception) {
-                _editProfileState.value = EditProfileState.Error("Ошибка обновления: ${e.message}")
+                _editProfileState.value = currentState.copy(errorMessage = e.message.toString() ?: "Ошибка отправки")
             }
         }
     }
@@ -104,13 +111,18 @@ class EditProfileViewModel @Inject constructor(
         val updatedProfile = currentState.editedProfile.copy(profileImageUrl = avatarUrl)
         _editProfileState.value = currentState.copy(editedProfile = updatedProfile)
     }
+
+    fun updateAvatarUri(uri: Uri) {
+        _avatarUri.value = uri
+    }
     sealed class EditProfileState {
         object Loading : EditProfileState()
         data class Success(
             val originalProfile: ProfileWithImage,
             val editedProfile: ProfileWithImage,
             val isSaving: Boolean = false,
-            val isSaved: Boolean = false
+            val isSaved: Boolean = false,
+            val errorMessage: String = ""
         ) : EditProfileState()
         data class Error(val message: String) : EditProfileState()
     }

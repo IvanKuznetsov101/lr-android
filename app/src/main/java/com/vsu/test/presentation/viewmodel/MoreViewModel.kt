@@ -75,13 +75,13 @@ class MoreViewModel @Inject constructor(
                     val profileId = tokenManager.getId()
                     val locationDto = LocationData(profileId, location.latitude, location.longitude)
                     _eventState.value = getEventStateUseCase(locationDto)
-                    if (_eventState.value is MoreState.NoEvents){
-                        if(visitorStorage.getVisitorId()!= null){
-                            val visitorId = visitorStorage.getVisitorId()
-                            visitorId?.let { updateEndTimeVisitorUseCase.invoke(it) }
-                            visitorStorage.clearVisitorInfo()
-                        }
-                    }
+//                    if (_eventState.value is MoreState.NoEvents){
+//                        if(visitorStorage.getVisitorId()!= null){
+//                            val visitorId = visitorStorage.getVisitorId()
+//                            visitorId?.let { updateEndTimeVisitorUseCase.invoke(it) }
+//                            visitorStorage.clearVisitorInfo()
+//                        }
+//                    }
                 }
             }
         }
@@ -93,7 +93,6 @@ class MoreViewModel @Inject constructor(
         }
     }
     fun createVisitor(lightRoomDTO: LightRoomDTO, context: Context){
-
         viewModelScope.launch {
             val profileId = tokenManager.getId()
             val visitorId = visitorStorage.getVisitorInfo()?.visitorId

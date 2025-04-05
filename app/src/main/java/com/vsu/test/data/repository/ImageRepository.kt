@@ -5,14 +5,11 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
 import com.vsu.test.data.api.ImageService
-import com.vsu.test.data.api.model.dto.ImageDTO
 import com.vsu.test.utils.BaseApiResponse
 import com.vsu.test.utils.NetworkResult
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.Response
-import retrofit2.http.Path
 import java.lang.Error
 import javax.inject.Inject
 
@@ -88,4 +85,5 @@ class ImageRepository @Inject constructor(
             else -> null
         }
     }
+
 }

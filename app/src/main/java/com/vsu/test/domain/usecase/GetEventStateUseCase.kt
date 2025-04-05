@@ -21,6 +21,7 @@ class GetEventStateUseCase @Inject constructor(
     private val lightRoomRepository: LightRoomRepository,
     private val visitorIdStorage: VisitorStorage,
     private val visitorRepository: VisitorRepository,
+    private val updateEndTimeVisitorUseCase: UpdateEndTimeVisitorUseCase,
     private val getEventWithDetailsByLightRoomIdUseCase: GetEventWithDetailsByLightRoomIdUseCase
 ) {
     suspend operator fun invoke(locationData: LocationData): MoreState {
@@ -30,6 +31,10 @@ class GetEventStateUseCase @Inject constructor(
             if (profileLightRoom != null) {
                 val profileEventWithDetails = getEventWithDetailsByLightRoomIdUseCase.invoke(profileLightRoom)
                 return MoreState.UserEvent(profileEventWithDetails!!)
+            } else {
+                if (visitorIdStorage.getVisitorId()!= null){
+                    visitorIdStorage.clearVisitorInfo()
+                }
             }
         }
 
@@ -38,12 +43,15 @@ class GetEventStateUseCase @Inject constructor(
             return MoreState.NoEvents
         }
 
-        val visitorInfo = getVisitorState(locationData.id)
         val eventsInRadius = inRadiusEvents.data.mapNotNull { event ->
             val lightRoom = getLightRoomByEventId(event.id) ?: return@mapNotNull null
             getEventWithDetailsByLightRoomIdUseCase.invoke(lightRoom)
         }
-
+        if(visitorIdStorage.getVisitorId()!= null && eventsInRadius.any { it.isHere }){
+            val visitorId = visitorIdStorage.getVisitorId()
+            visitorId?.let { updateEndTimeVisitorUseCase.invoke(it) }
+            visitorIdStorage.clearVisitorInfo()
+        }
         return MoreState.EventsInRadius(eventsInRadius)
     }
 

@@ -8,6 +8,5 @@ data class LightRoomRequest(
     @SerializedName("longitude")
     val longitude: Double,
     @SerializedName("eventId")
-    val eventId: Long,
-
+    val eventId: Long
 )

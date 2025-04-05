@@ -37,8 +37,8 @@ class GetEventWithDetailsByLightRoomIdUseCase @Inject constructor(
         val profileWithDetails = event?.let { getProfileWithDetailsByEventId(it.id) }
 
         if (event == null || visitorInfo == null || lightRoom == null ||
-            isHere == null || count == null || profileWithDetails == null ||
-            eventImagesUrls == null) {
+            /*isHere == null ||*/ count == null || profileWithDetails == null
+            ) {
             return null
         }
         return EventWithDetails(

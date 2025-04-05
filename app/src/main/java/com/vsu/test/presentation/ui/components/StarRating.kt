@@ -6,8 +6,10 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarHalf
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 
 @Composable
 fun StarRating(rating: Double, maxStars: Int = 5) {
@@ -20,7 +22,7 @@ fun StarRating(rating: Double, maxStars: Int = 5) {
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = "Full Star",
-                tint = Color.Yellow
+                tint = Color.Black
             )
         }
 
@@ -28,7 +30,7 @@ fun StarRating(rating: Double, maxStars: Int = 5) {
             Icon(
                 imageVector = Icons.Filled.StarHalf,
                 contentDescription = "Half Star",
-                tint = Color.Yellow
+                tint = Color.Black
             )
         }
 

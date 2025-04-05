@@ -86,7 +86,8 @@ dependencies {
 
     // Hilt и связанные библиотеки
     implementation("com.google.dagger:hilt-android:2.51.1")
-    implementation(libs.androidx.media3.common.ktx) // Обновлено до 2.51.1
+    implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.foundation.layout.android) // Обновлено до 2.51.1
     kapt("com.google.dagger:hilt-android-compiler:2.51.1") // Обновлено до 2.51.1
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation ("androidx.hilt:hilt-work:1.0.0")

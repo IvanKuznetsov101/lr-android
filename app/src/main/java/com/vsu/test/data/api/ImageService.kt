@@ -1,7 +1,5 @@
 package com.vsu.test.data.api
 
-import com.vsu.test.data.api.model.dto.ImageDTO
-import com.vsu.test.utils.NetworkResult
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.GET
@@ -38,4 +36,5 @@ interface ImageService {
 
     @GET("/api/images/event/{eventId}?links")
     suspend fun getImagesUrlsByEvent(@Path("eventId") eventId: Long): Response<List<String>>
+
 }

@@ -10,10 +10,13 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -23,6 +26,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -35,11 +39,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.vsu.test.R
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.LightRoomDTO
@@ -69,7 +76,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(onNavigateToMore:() -> Unit) {
+fun MapScreen(
+    onNavigateToMore: () -> Unit,
+    navController: NavController
+) {
     val context = LocalContext.current
     val viewModel: MapViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
@@ -78,12 +88,12 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
     val imageProvider = ImageProvider.fromResource(context, R.drawable.ic_lightroom)
 
 
-
     val checkLocationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions[ACCESS_FINE_LOCATION] == true &&
-            permissions[ACCESS_COARSE_LOCATION] == true) {
+            permissions[ACCESS_COARSE_LOCATION] == true
+        ) {
             viewModel.onPermissionGranted(mapView)
             mapView.onStart() // Вызываем onStart здесь, если он зависит от разрешений
         }
@@ -91,7 +101,8 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
 
     LaunchedEffect(Unit) {
         if (checkSelfPermission(context, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED &&
-            checkSelfPermission(context, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED) {
+            checkSelfPermission(context, ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED
+        ) {
             viewModel.onPermissionGranted(mapView)
             mapView.onStart() // Вызываем onStart здесь, если разрешения уже есть
         } else {
@@ -120,7 +131,8 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
             val placemark = placemarkCollection.addPlacemark(
                 point,
                 imageProvider,
-                IconStyle().setScale(0.3f))
+                IconStyle().setScale(0.3f)
+            )
             placemark.userData = lightRoomDTO // Сохраняем DTO в placemark
             placemark.addTapListener(placemarkTapListener)
         }
@@ -148,7 +160,7 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
         }
 
         eventWithDetails?.let { details ->
-            if(selectedLightRoomDTO!= null){
+            if (selectedLightRoomDTO != null) {
                 LightRoomBottomSheetHandler(
                     eventWithDetails = details,
                     eventViewModel = eventViewModel,
@@ -156,7 +168,8 @@ fun MapScreen(onNavigateToMore:() -> Unit) {
                     onDismiss = {
                         selectedLightRoomDTO = null
                     },
-                    endsAfter = TimeUtils.formatTimeDifference(details.lightRoom.startTime)
+                    endsAfter = TimeUtils.formatTimeDifference(details.lightRoom.startTime),
+                    navController = navController
                 )
             }
 
@@ -242,10 +255,14 @@ fun MapControls(
                 .align(Alignment.BottomEnd)
                 .offset(x = 32.dp, y = (-40).dp),
             leftButton = {
-                showEventsSheet = true
-                sheetContent = "list"
+                if(viewModel.checkProfileLightRoom()){
+                    onNavigateToMore()
+                } else {
+                    showEventsSheet = true
+                    sheetContent = "list"
+                }
             },
-            rightButton = {onNavigateToMore()},
+            rightButton = { onNavigateToMore() },
             Icons.Default.Add,
             Icons.Default.Menu
         )
@@ -257,32 +274,50 @@ fun MapControls(
                     sheetContent = "list"
                     selectedEvent = null
                 },
+                containerColor = Color.White,
                 sheetState = sheetState
             ) {
                 when (sheetContent) {
                     "list" -> {
                         if (isLoading) {
-                            Box(Modifier.fillMaxWidth()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
+                            LoadingScreen()
                         } else {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                items(events, key = { it.id }) { event ->
-                                    ListItem(
-                                        eventDTO = event,
-                                        onClick = {
-                                            selectedEvent = event
-                                            sheetContent = "edit"
-                                        },
-                                        onCloseClick = {
-                                            eventViewModel.deleteEvent(event.id)
-                                        }
+                            if (events.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Тут пока пусто",
+                                        fontSize = 18.sp,
+                                        color = Color.Gray
                                     )
+                                }
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+
+                                ) {
+                                    items(events, key = { it.id }) { event ->
+                                        ListItem(
+                                            eventDTO = event,
+                                            onClick = {
+                                                selectedEvent = event
+                                                sheetContent = "edit"
+                                            },
+                                            onCloseClick = {
+                                                eventViewModel.deleteEvent(event.id)
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
+
                         Box(modifier = Modifier.fillMaxSize()) {
                             CombinedActions(
                                 modifier = Modifier
@@ -301,11 +336,16 @@ fun MapControls(
                             )
                         }
                     }
+
                     "create" -> {
                         CRUDEvent(
                             eventDTO = null,
                             onSave = { newEvent, images ->
-                                eventViewModel.createEventAndCreateLightRoom(newEvent, viewModel.getCurrentUserCoordinates(), images)
+                                eventViewModel.createEventAndCreateLightRoom(
+                                    newEvent,
+                                    viewModel.getCurrentUserCoordinates(),
+                                    images
+                                )
                                 sheetContent = "list"
                             },
                             onCancel = { newEvent, images ->
@@ -314,12 +354,17 @@ fun MapControls(
                             }
                         )
                     }
+
                     "edit" -> {
                         selectedEvent?.let { event ->
                             CRUDEvent(
                                 eventDTO = event,
                                 onSave = { updatedEvent, images ->
-                                    eventViewModel.updateEventAndCreateLightRoom(updatedEvent, images, viewModel.getCurrentUserCoordinates())
+                                    eventViewModel.updateEventAndCreateLightRoom(
+                                        updatedEvent,
+                                        images,
+                                        viewModel.getCurrentUserCoordinates()
+                                    )
                                     sheetContent = "list"
                                 },
                                 onCancel = { updatedEvent, images ->

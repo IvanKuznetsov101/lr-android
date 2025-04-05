@@ -27,12 +27,10 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
+import androidx.navigation.NavController
 import com.vsu.test.R
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.domain.model.EventWithDetails
-import com.vsu.test.domain.model.EventWithLightRoomData
 import com.vsu.test.domain.usecase.MoreState
 import com.vsu.test.presentation.ui.components.CombinedActions
 import com.vsu.test.presentation.ui.components.EventCard
@@ -49,7 +47,8 @@ fun MoreScreen(
     profileViewModel: ProfileViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit,
     onNavigateToMap: () -> Unit,
-    onNavigateToProfile:() -> Unit
+    onNavigateToProfile:() -> Unit,
+    navController: NavController,
 ) {
 
     val context = LocalContext.current
@@ -84,7 +83,8 @@ fun MoreScreen(
                 viewModel = viewModel,
                 eventViewModel = eventViewModel,
                 profileViewModel = profileViewModel,
-                context = context)
+                context = context,
+                navController = navController)
             Spacer(modifier = Modifier.height(16.dp))
         }
         CombinedActions(
@@ -105,8 +105,12 @@ private fun ContentBox(
     viewModel: MoreViewModel,
     eventViewModel: EventViewModel,
     profileViewModel: ProfileViewModel,
-    context: Context
+    context: Context,
+    navController: NavController
 ) {
+    val isSheetOpen = remember { mutableStateOf(false) } // Управляем состоянием
+    val selectedEvent = remember { mutableStateOf<EventDTO?>(null) } // Выбранное событие
+
     Box(
         modifier = Modifier
             .height(700.dp)
@@ -127,9 +131,22 @@ private fun ContentBox(
                         onClickButton = {
                             viewModel.deleteLightRoomById(state.eventWithDetails.lightRoom.id, context)
                         },
-                        onClickCard = {},
+                        onClickCard = {
+                            isSheetOpen.value = true
+                            selectedEvent.value = state.eventWithDetails.event
+                        },
                         endsAfter = TimeUtils.formatTimeDifference(state.eventWithDetails.lightRoom.startTime)
                     )
+                    if (isSheetOpen.value) {
+                        LightRoomBottomSheetHandler(
+                            eventWithDetails = state.eventWithDetails,
+                            profileViewModel = profileViewModel,
+                            eventViewModel = eventViewModel,
+                            onDismiss = { isSheetOpen.value = false },
+                            endsAfter = TimeUtils.formatTimeDifference(state.eventWithDetails.lightRoom.startTime),
+                            navController = navController
+                        )
+                    }
                 }
                 is MoreState.EventsInRadius -> {
                     EventCarouselScreen(
@@ -137,15 +154,21 @@ private fun ContentBox(
                         eventViewModel = eventViewModel,
                         profileViewModel = profileViewModel,
                         moreViewModel = viewModel,
-                        context = context)
+                        context = context,
+                        navController = navController,
+                        isSheetOpen = isSheetOpen, // Передаем состояние
+                        selectedEvent = selectedEvent // Передаем выбранное событие
+                    )
                 }
                 is MoreState.NoEvents -> {
                     PlaceholderContent()
                 }
                 is MoreState.Loading -> {
+                    LoadingScreen()
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
             }
+
         }
     }
 }
@@ -156,12 +179,12 @@ private fun EventCarouselScreen(
     eventViewModel: EventViewModel,
     profileViewModel: ProfileViewModel,
     moreViewModel: MoreViewModel,
-    context: Context
+    context: Context,
+    navController: NavController,
+    isSheetOpen: MutableState<Boolean>,
+    selectedEvent: MutableState<EventDTO?>
 ) {
     val pagerState = rememberPagerState { eventsWithDetails.size }
-    var isSheetOpen by remember { mutableStateOf(false) }
-    var selectedEvent by remember { mutableStateOf<EventDTO?>(null) }
-
 
     val eventsWithDetailsState = remember { mutableStateListOf(*eventsWithDetails.toTypedArray()) }
 
@@ -188,36 +211,39 @@ private fun EventCarouselScreen(
             visitorCount = eventWithDetails.visitorsCount,
             onClickButton = onClick,
             onClickCard = {
-                isSheetOpen = true
-                selectedEvent = eventWithDetails.event
+                isSheetOpen.value = true
+                selectedEvent.value = eventWithDetails.event
             },
             endsAfter = TimeUtils.formatTimeDifference(eventWithDetails.lightRoom.startTime)
         )
-        if (isSheetOpen) {
-            LightRoomBottomSheetHandler(
-                eventWithDetails = eventWithDetails,
-                profileViewModel = profileViewModel,
-                eventViewModel = eventViewModel,
-                onDismiss = { isSheetOpen = false },
-                endsAfter = TimeUtils.formatTimeDifference(eventWithDetails.lightRoom.startTime)
-            )
-        }
+
+
     }
 }
 
 @Composable
 private fun PlaceholderContent() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+
+
+    Box(
+        modifier = Modifier
+            .size(width = 320.dp, height = 700.dp)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.placeholder),
+            painter = painterResource(id = R.drawable.light_room_placeholder),
             contentDescription = "Empty placeholder",
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-        Text("Тут пока пусто", fontSize = 16.sp)
+        Text(
+            text = "Тут пока пусто",
+            fontSize = 20.sp,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(32.dp),
+            color = Color.White
+        )
     }
+
+
 }

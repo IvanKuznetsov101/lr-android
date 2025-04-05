@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vsu.test.R
 import com.vsu.test.data.api.model.dto.LightRoomDTO
+import com.vsu.test.data.storage.VisitorStorage
 import com.vsu.test.domain.usecase.LightRoomUseCase
 import com.vsu.test.utils.NetworkResult
 import com.yandex.mapkit.Animation
@@ -34,9 +35,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    private val lightRoomUseCase: LightRoomUseCase
+    private val lightRoomUseCase: LightRoomUseCase,
+    private val visitorStorage: VisitorStorage
 ) : ViewModel(), UserLocationObjectListener, CameraListener {
-
     private val _visibleArea = MutableStateFlow<BoundingBox?>(null)
     val points = MutableStateFlow<List<LightRoomDTO>>(emptyList())
     val loading = MutableStateFlow(false)
@@ -136,14 +137,13 @@ class MapViewModel @Inject constructor(
     }
 
     override fun onObjectRemoved(p0: UserLocationView) {
-        // Можно оставить пустым, если не требуется обработка
+
     }
 
     override fun onObjectUpdated(p0: UserLocationView, p1: ObjectEvent) {
         userCoordinates.value = p0.accuracyCircle.geometry.center
     }
 
-    /** Обработка изменений положения камеры */
     override fun onCameraPositionChanged(
         map: Map,
         position: CameraPosition,
@@ -167,7 +167,6 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    /** Установка якоря для слоя пользователя */
     private fun setAnchor() {
         mapView?.let {
             userLocationLayer.setAnchor(
@@ -178,8 +177,13 @@ class MapViewModel @Inject constructor(
         followUserLocation = false
     }
 
-    /** Сброс якоря */
     private fun noAnchor() {
         userLocationLayer.resetAnchor()
+    }
+
+    fun checkProfileLightRoom(): Boolean{
+
+        val visitorInfo = visitorStorage.getVisitorInfo()
+        return visitorStorage.getVisitorId() != null
     }
 }

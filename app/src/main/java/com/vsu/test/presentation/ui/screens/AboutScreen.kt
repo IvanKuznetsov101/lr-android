@@ -46,7 +46,8 @@ fun AboutScreen(onNavigateToSettings:() -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             DefaultButton(
                 onClick = { openUrl(context, url) },
-                text = "Условия использования Яндекс Карт"
+                text = "Yandex.Maps Terms of Use",
+                icon = null
             )
         }
         BackButton(
