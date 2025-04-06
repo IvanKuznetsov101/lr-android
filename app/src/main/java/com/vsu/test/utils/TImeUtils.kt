@@ -16,7 +16,7 @@ object TimeUtils {
             val startDateTime = LocalDateTime.now(ZoneOffset.UTC) // Текущее время в UTC
             val endDateTime = LocalDateTime.parse(fixNanoFormat(end), formatter)
 
-            val duration = Duration.between(endDateTime, startDateTime)
+            val duration = Duration.between(startDateTime, endDateTime)
             val hours = duration.toHours()
             val minutes = duration.toMinutes() % 60
 

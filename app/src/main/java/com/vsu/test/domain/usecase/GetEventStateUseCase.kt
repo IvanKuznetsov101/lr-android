@@ -1,16 +1,11 @@
 package com.vsu.test.domain.usecase
 
-
-import com.vsu.test.data.api.VisitorService
 import com.vsu.test.data.api.model.dto.LightRoomDTO
 import com.vsu.test.data.repository.EventRepository
 import com.vsu.test.data.repository.LightRoomRepository
 import com.vsu.test.data.repository.ProfileRepository
 import com.vsu.test.data.repository.VisitorRepository
-import com.vsu.test.data.storage.VisitorStorage
-import com.vsu.test.data.storage.VisitorInfo
 import com.vsu.test.domain.model.EventWithDetails
-import com.vsu.test.domain.model.EventWithLightRoomData
 import com.vsu.test.domain.model.LocationData
 import com.vsu.test.utils.NetworkResult
 import javax.inject.Inject
@@ -19,7 +14,6 @@ class GetEventStateUseCase @Inject constructor(
     private val eventRepository: EventRepository,
     private val profileRepository: ProfileRepository,
     private val lightRoomRepository: LightRoomRepository,
-    private val visitorIdStorage: VisitorStorage,
     private val visitorRepository: VisitorRepository,
     private val updateEndTimeVisitorUseCase: UpdateEndTimeVisitorUseCase,
     private val getEventWithDetailsByLightRoomIdUseCase: GetEventWithDetailsByLightRoomIdUseCase
@@ -31,10 +25,6 @@ class GetEventStateUseCase @Inject constructor(
             if (profileLightRoom != null) {
                 val profileEventWithDetails = getEventWithDetailsByLightRoomIdUseCase.invoke(profileLightRoom)
                 return MoreState.UserEvent(profileEventWithDetails!!)
-            } else {
-                if (visitorIdStorage.getVisitorId()!= null){
-                    visitorIdStorage.clearVisitorInfo()
-                }
             }
         }
 
@@ -46,11 +36,6 @@ class GetEventStateUseCase @Inject constructor(
         val eventsInRadius = inRadiusEvents.data.mapNotNull { event ->
             val lightRoom = getLightRoomByEventId(event.id) ?: return@mapNotNull null
             getEventWithDetailsByLightRoomIdUseCase.invoke(lightRoom)
-        }
-        if(visitorIdStorage.getVisitorId()!= null && eventsInRadius.any { it.isHere }){
-            val visitorId = visitorIdStorage.getVisitorId()
-            visitorId?.let { updateEndTimeVisitorUseCase.invoke(it) }
-            visitorIdStorage.clearVisitorInfo()
         }
         return MoreState.EventsInRadius(eventsInRadius)
     }
@@ -64,27 +49,27 @@ class GetEventStateUseCase @Inject constructor(
         return if (response is NetworkResult.Success) response.data!! else 0L
     }
 
-    private suspend fun getVisitorState(profileId: Long): VisitorInfo {
-        val storedVisitorId = visitorIdStorage.getVisitorInfo()?.visitorId
-        val visitorResponse = visitorRepository.getCurrentVisitorByProfileId(profileId)
-
-        if (visitorResponse is NetworkResult.Success) {
-            val newVisitorInfo = VisitorInfo(
-                visitorId = visitorResponse.data!!.idVisitor,
-                lightRoomId = visitorResponse.data.idLightRoom,
-                profileId = visitorResponse.data.idProfile
-            )
-            if (storedVisitorId != newVisitorInfo.visitorId) {
-                visitorIdStorage.clearVisitorInfo()
-                visitorIdStorage.saveVisitorInfo(newVisitorInfo)
-            }
-            return newVisitorInfo
-        }
-
-        return VisitorInfo(visitorId = null, lightRoomId = null, profileId = null).also {
-            visitorIdStorage.saveVisitorInfo(it)
-        }
-    }
+//    private suspend fun getVisitorState(profileId: Long): VisitorInfo {
+//        val storedVisitorId = visitorIdStorage.getVisitorInfo()?.visitorId
+//        val visitorResponse = visitorRepository.getCurrentVisitorByProfileId(profileId)
+//
+//        if (visitorResponse is NetworkResult.Success) {
+//            val newVisitorInfo = VisitorInfo(
+//                visitorId = visitorResponse.data!!.idVisitor,
+//                lightRoomId = visitorResponse.data.idLightRoom,
+//                profileId = visitorResponse.data.idProfile
+//            )
+//            if (storedVisitorId != newVisitorInfo.visitorId) {
+//                visitorIdStorage.clearVisitorInfo()
+//                visitorIdStorage.saveVisitorInfo(newVisitorInfo)
+//            }
+//            return newVisitorInfo
+//        }
+//
+//        return VisitorInfo(visitorId = null, lightRoomId = null, profileId = null).also {
+//            visitorIdStorage.saveVisitorInfo(it)
+//        }
+//    }
 }
 sealed class MoreState {
     object Loading : MoreState()

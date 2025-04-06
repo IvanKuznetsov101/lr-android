@@ -126,17 +126,26 @@ fun LightRoomBottomSheetContent(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 repeat(imagesUrls.size) { index ->
-                    val color = if (pagerState.currentPage == index) Color.Black else Color.Gray
+                    val colorIn = if (pagerState.currentPage == index) Color.Black else Color.White
+                    val colorAround = if (pagerState.currentPage == index) Color.White else Color.Black
                     Box(
                         modifier = Modifier
-                            .size(8.dp)
+                            .size(16.dp) // внешний круг
                             .clip(CircleShape)
-                            .background(color)
-                            .padding(2.dp)
-                    )
+                            .background(colorAround),
+                        contentAlignment = Alignment.Center // центрируем внутренний круг
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp) // внутренний круг меньше
+                                .clip(CircleShape)
+                                .background(colorIn)
+                        )
+                    }
+
                 }
             }
         }
@@ -175,6 +184,7 @@ fun LightRoomBottomSheetContent(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(12.dp))
             Column(
                 Modifier
                     .shadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp), clip = true)
@@ -225,7 +235,7 @@ fun LightRoomBottomSheetContent(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = eventWithDetails.event.description ?: "Описание отсутствует",
-                style = TextStyle(fontSize = 14.sp, color = Color.Black),
+                style = TextStyle(fontSize = 16.sp, color = Color.Black),
                 modifier = Modifier.padding(top = 8.dp)
             )
         }

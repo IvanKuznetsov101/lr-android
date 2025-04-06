@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -29,8 +30,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.vsu.test.R
+import com.vsu.test.Screen
 import com.vsu.test.data.api.model.dto.ReviewWithProfile
 import com.vsu.test.domain.model.ProfileWithDetails
 import com.vsu.test.presentation.ui.components.BackButton
@@ -43,7 +46,8 @@ import com.vsu.test.presentation.viewmodel.ReviewsViewModel
 fun ReviewScreen(
     profileId: Long,
     onBackClick: () -> Unit,
-    reviewsViewModel: ReviewsViewModel = hiltViewModel()
+    reviewsViewModel: ReviewsViewModel = hiltViewModel(),
+    navController: NavController
 ){
     val state by reviewsViewModel.reviewsState.collectAsState()
     LaunchedEffect(profileId) {
@@ -56,7 +60,8 @@ fun ReviewScreen(
             (state as ReviewsViewModel.ReviewsState.Success).profile,
             (state as ReviewsViewModel.ReviewsState.Success).reviews,
             reviewsViewModel,
-            onBackClick)
+            onBackClick,
+            navController)
         is ReviewsViewModel.ReviewsState.Error -> ErrorScreen((state as ProfileViewModel.ProfileState.Error).message)
         else -> Unit
     }
@@ -66,7 +71,8 @@ fun ReviewScreenContent(
     profileWithDetails: ProfileWithDetails,
     reviews: List<ReviewWithProfile>?,
     reviewsViewModel: ReviewsViewModel,
-    onBackClick:() -> Unit
+    onBackClick:() -> Unit,
+    navController: NavController
 ){
     Box(modifier = Modifier
         .fillMaxSize()
@@ -89,16 +95,27 @@ fun ReviewScreenContent(
                     model = profileWithDetails.profileImageUrl,
                     contentDescription = "Изображение профиля",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(60.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(R.drawable.placeholder),
                     error = painterResource(R.drawable.placeholder),
                     imageLoader = reviewsViewModel.imageLoader
                 )
-                Text(profileWithDetails.profile.fullName)
-                StarRating(profileWithDetails.ratingWithCount.averageRating)
-                Text(profileWithDetails.ratingWithCount.count.toString())
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(" ${profileWithDetails.profile.fullName} ")
+
+                    Row{
+                        StarRating(profileWithDetails.ratingWithCount.averageRating)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "(${profileWithDetails.ratingWithCount.count.toString()})",
+                            color = Color.Gray,
+                            fontSize = 14.sp)
+                    }
+                }
+
+
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -107,7 +124,11 @@ fun ReviewScreenContent(
                 items(items = reviews.orEmpty()) { review ->
                     ReviewCard(
                         review = review,
-                        reviewsViewModel = reviewsViewModel)
+                        reviewsViewModel = reviewsViewModel,
+                        onClick = {
+                            val profileId = review.fromProfileId.toString()
+                            navController.navigate(Screen.Profile.route(profileId))
+                        })
                 }
             }
         }

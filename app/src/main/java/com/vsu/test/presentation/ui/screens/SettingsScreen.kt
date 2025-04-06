@@ -38,20 +38,20 @@ fun SettingsScreen(onNavigateToAbout: () -> Unit,
             .fillMaxSize()
             .background(color = Color.White)
     ) {
-        // Заголовок сверху
+
         Text(
             text = "Settings",
             fontSize = 24.sp,
             modifier = Modifier
-                .align(Alignment.TopCenter) // Размещаем сверху
-                .padding(top = 32.dp) // Добавляем отступ сверху
+                .align(Alignment.TopCenter)
+                .padding(top = 32.dp)
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center, // Центрируем содержимое (без заголовка)
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DefaultButton(

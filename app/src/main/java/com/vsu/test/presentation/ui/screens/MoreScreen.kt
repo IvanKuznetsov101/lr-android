@@ -1,8 +1,6 @@
 package com.vsu.test.presentation.ui.screens
 
-import android.app.Activity
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -135,7 +133,7 @@ private fun ContentBox(
                             isSheetOpen.value = true
                             selectedEvent.value = state.eventWithDetails.event
                         },
-                        endsAfter = TimeUtils.formatTimeDifference(state.eventWithDetails.lightRoom.startTime)
+                        endsAfter = TimeUtils.formatTimeDifference(state.eventWithDetails.lightRoom.endTime)
                     )
                     if (isSheetOpen.value) {
                         LightRoomBottomSheetHandler(
@@ -143,10 +141,12 @@ private fun ContentBox(
                             profileViewModel = profileViewModel,
                             eventViewModel = eventViewModel,
                             onDismiss = { isSheetOpen.value = false },
-                            endsAfter = TimeUtils.formatTimeDifference(state.eventWithDetails.lightRoom.startTime),
+                            endsAfter = TimeUtils.formatTimeDifference(state.eventWithDetails.lightRoom.endTime),
                             navController = navController
                         )
                     }
+
+
                 }
                 is MoreState.EventsInRadius -> {
                     EventCarouselScreen(
@@ -157,7 +157,7 @@ private fun ContentBox(
                         context = context,
                         navController = navController,
                         isSheetOpen = isSheetOpen, // Передаем состояние
-                        selectedEvent = selectedEvent // Передаем выбранное событие
+                        selectedEvent = selectedEvent
                     )
                 }
                 is MoreState.NoEvents -> {
@@ -193,7 +193,7 @@ private fun EventCarouselScreen(
         modifier = Modifier.fillMaxSize()
     ) { page ->
         val eventWithDetails = eventsWithDetailsState[page]
-        val textOnButton = if (!eventWithDetails.isHere) "Join" else ""
+        val textOnButton = if (!eventWithDetails.isHere) "Join" else "You're here"
         val onClick: () -> Unit = if (!eventWithDetails.isHere) {
             {
                 moreViewModel.createVisitor(eventWithDetails.lightRoom, context)
@@ -214,17 +214,23 @@ private fun EventCarouselScreen(
                 isSheetOpen.value = true
                 selectedEvent.value = eventWithDetails.event
             },
-            endsAfter = TimeUtils.formatTimeDifference(eventWithDetails.lightRoom.startTime)
+            endsAfter = TimeUtils.formatTimeDifference(eventWithDetails.lightRoom.endTime)
         )
-
-
+        if (isSheetOpen.value) {
+            LightRoomBottomSheetHandler(
+                eventWithDetails = eventWithDetails,
+                profileViewModel = profileViewModel,
+                eventViewModel = eventViewModel,
+                onDismiss = { isSheetOpen.value = false },
+                endsAfter = TimeUtils.formatTimeDifference(eventWithDetails.lightRoom.endTime),
+                navController = navController
+            )
+        }
     }
 }
 
 @Composable
 private fun PlaceholderContent() {
-
-
     Box(
         modifier = Modifier
             .size(width = 320.dp, height = 700.dp)

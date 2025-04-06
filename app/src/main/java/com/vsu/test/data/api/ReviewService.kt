@@ -2,7 +2,6 @@ package com.vsu.test.data.api
 
 import com.vsu.test.data.api.model.dto.AverageRatingWithCount
 import com.vsu.test.data.api.model.dto.EventDTO
-import com.vsu.test.data.api.model.dto.ReviewDTO
 import com.vsu.test.data.api.model.dto.ReviewWithProfile
 import com.vsu.test.data.api.model.request.CreateReviewRequest
 import com.vsu.test.data.api.model.request.EventRequest

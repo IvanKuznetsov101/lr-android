@@ -17,10 +17,9 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
-    //private val _loginState = MutableLiveData<NetworkResult<JwtResponse>?>(null)
     private val _loginEvent = MutableSharedFlow<LoginEvent>()
     val loginEvent: SharedFlow<LoginEvent> = _loginEvent
-    val error = MutableStateFlow<String?>(null)
+    val error = MutableStateFlow<String>("")
 
     sealed class LoginEvent {
         object Success : LoginEvent()
@@ -29,14 +28,14 @@ class AuthViewModel @Inject constructor(
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            //_loginState.value = NetworkResult.Loading()
+
             val response = authRepository.login(username, password)
             if (response is NetworkResult.Success){
                 _loginEvent.emit(LoginEvent.Success)
             }
             else{
+                error.value = "Invalid username or password"
                 _loginEvent.emit(LoginEvent.Error(response.message ?: "Error"))
-              //error.value = response.message ?: "Error"
             }
         }
     }

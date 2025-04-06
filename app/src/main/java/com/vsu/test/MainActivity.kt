@@ -137,6 +137,7 @@ class MainActivity : ComponentActivity() {
                         ReviewScreen(
                             profileId = profileId,
                             onBackClick = { navController.popBackStack() },
+                            navController = navController
                         )
                     }
                 }

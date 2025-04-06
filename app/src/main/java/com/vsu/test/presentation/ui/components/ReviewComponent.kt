@@ -1,13 +1,17 @@
 package com.vsu.test.presentation.ui.components
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -19,13 +23,22 @@ import com.vsu.test.data.api.model.dto.ReviewWithProfile
 import com.vsu.test.presentation.viewmodel.ReviewsViewModel
 
 @Composable
-fun ReviewCard(review: ReviewWithProfile,
-reviewsViewModel: ReviewsViewModel) {
+fun ReviewCard(
+    review: ReviewWithProfile,
+    reviewsViewModel: ReviewsViewModel,
+    onClick:() -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(8.dp)
+            .padding(8.dp)
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .clickable{onClick()},
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Верхняя строка с аватаркой, именем и датой

@@ -71,7 +71,10 @@ class ImageRepository @Inject constructor(
             Error("No valid files selected")
         }
     }
-
+    suspend fun deleteImages (ids: List<Long>): NetworkResult<List<Long>>{
+        val stringIds = ids.joinToString (",")
+        return safeApiCall { imageService.deleteImages(stringIds) }
+    }
     private fun getFileNameFromUri(uri: Uri): String? {
         return when (uri.scheme) {
             "content" -> {

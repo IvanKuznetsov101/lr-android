@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -33,13 +34,18 @@ fun LastEventCard(event: LastEvent,
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(32.dp),
-
+            .padding(8.dp)
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .clickable{onClick()},
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
         Column(modifier = Modifier
             .padding(16.dp)
-            .clickable{onClick()}) {
+           /* .clickable{onClick()}*/) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
                     model = event.image,

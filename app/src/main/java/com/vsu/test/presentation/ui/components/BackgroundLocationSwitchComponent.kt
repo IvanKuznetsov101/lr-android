@@ -12,7 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -34,11 +39,17 @@ fun LocationTrackingSwitch(
 ) {
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    var isTrackingEnabled by remember { mutableStateOf(prefs.getBoolean("tracking_enabled", false)) }
+    var isTrackingEnabled by remember {
+        mutableStateOf(
+            prefs.getBoolean(
+                "tracking_enabled",
+                false
+            )
+        )
+    }
     var showPermissionDialog by remember { mutableStateOf(false) }
     var pendingNotificationPermission by remember { mutableStateOf(false) } // Ожидание запроса уведомлений
 
-    // Лаунчер для ACCESS_BACKGROUND_LOCATION
     val backgroundLocationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -53,11 +64,10 @@ fun LocationTrackingSwitch(
         }
     }
 
-    // Лаунчер для POST_NOTIFICATIONS
     val notificationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        isTrackingEnabled = isGranted // Включаем Switch только если оба разрешения есть
+        isTrackingEnabled = isGranted
         prefs.edit().putBoolean("tracking_enabled", isGranted).apply()
         if (isGranted) {
             try {
@@ -75,7 +85,7 @@ fun LocationTrackingSwitch(
             Log.d("LocationTrackingSwitch", "POST_NOTIFICATIONS denied")
             onServiceStateChanged(false)
         }
-        pendingNotificationPermission = false // Сбрасываем флаг
+        pendingNotificationPermission = false
     }
 
     Row(
@@ -85,11 +95,17 @@ fun LocationTrackingSwitch(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Отслеживание местоположения",
+            text = "Location tracking",
             modifier = Modifier.weight(1f)
         )
         Switch(
             checked = isTrackingEnabled,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color.Black,
+                uncheckedThumbColor = Color.Black,
+                uncheckedTrackColor = Color.White
+            ),
             onCheckedChange = { enabled ->
                 if (enabled) {
                     val fineLocationGranted = ContextCompat.checkSelfPermission(
@@ -103,7 +119,6 @@ fun LocationTrackingSwitch(
                     ) == PackageManager.PERMISSION_GRANTED
 
                     if (fineLocationGranted && backgroundLocationGranted && postNotificationsGranted) {
-                        // Все разрешения есть, включаем сервис
                         isTrackingEnabled = true
                         prefs.edit().putBoolean("tracking_enabled", true).apply()
                         try {
@@ -118,17 +133,17 @@ fun LocationTrackingSwitch(
                             onServiceStateChanged(false)
                         }
                     } else if (fineLocationGranted) {
-                        // ACCESS_FINE_LOCATION есть, но нет остальных
                         showPermissionDialog = true
                     } else {
-                        // ACCESS_FINE_LOCATION нет, что-то пошло не так
-                        Log.e("LocationTrackingSwitch", "ACCESS_FINE_LOCATION not granted unexpectedly")
+                        Log.e(
+                            "LocationTrackingSwitch",
+                            "ACCESS_FINE_LOCATION not granted unexpectedly"
+                        )
                         isTrackingEnabled = false
                         prefs.edit().putBoolean("tracking_enabled", false).apply()
                         onServiceStateChanged(false)
                     }
                 } else {
-                    // Выключаем сервис
                     isTrackingEnabled = false
                     prefs.edit().putBoolean("tracking_enabled", false).apply()
                     try {
@@ -144,11 +159,10 @@ fun LocationTrackingSwitch(
         )
     }
 
-    // Диалог для запроса разрешений
     if (showPermissionDialog) {
         ShowAlertDialog(
-            dialogTitle = "Требуется разрешение",
-            dialogText = "Для работы отслеживания нужно предоставить разрешения на фоновое местоположение и уведомления. Хотите сделать это сейчас?",
+            dialogTitle = "Permission is required",
+            dialogText = "For tracking to work, you need to grant permissions for background location and notifications. Do you want to do it now?",
             onConfirmation = {
                 showPermissionDialog = false
                 backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
@@ -162,7 +176,6 @@ fun LocationTrackingSwitch(
         )
     }
 
-    // Запрос POST_NOTIFICATIONS после ACCESS_BACKGROUND_LOCATION
     if (pendingNotificationPermission) {
         LaunchedEffect(Unit) {
             notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -182,12 +195,24 @@ fun ShowAlertDialog(
         title = { Text(dialogTitle) },
         text = { Text(dialogText) },
         confirmButton = {
-            Button(onClick = onConfirmation) {
+            Button(
+                onClick = onConfirmation,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                )
+            ) {
                 Text("Согласен")
             }
         },
         dismissButton = {
-            Button(onClick = onDismissRequest) {
+            Button(
+                onClick = onDismissRequest,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                )
+            ) {
                 Text("Отмена")
             }
         }

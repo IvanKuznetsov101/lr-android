@@ -25,8 +25,10 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import com.vsu.test.domain.model.SignUpData
 import com.vsu.test.presentation.ui.components.DefaultButton
+import com.vsu.test.presentation.ui.components.ErrorMessageBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +41,8 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
     var dateOfBirth by remember { mutableStateOf(LocalDate.now().minusYears(18)) }
     var showDatePicker by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
+    val errorMessage by viewModel.error.collectAsState()
+    val focusManager = LocalFocusManager.current
     // Подписка на состояние из ViewModel
     val registrationState by viewModel.registrationState.observeAsState()
 
@@ -63,7 +66,11 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Black,
             )
         )
 
@@ -79,8 +86,14 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
-            )
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Black,
+
+            ),
+
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -96,7 +109,11 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Black,
             )
         )
 
@@ -112,7 +129,11 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Black,
             )
         )
 
@@ -128,7 +149,11 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Black,
             ),
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {
@@ -165,7 +190,11 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
                 DatePicker(state = datePickerState)
             }
         }
-
+        Spacer(modifier = Modifier.height(16.dp))
+        if(errorMessage.isNotEmpty()){
+            Spacer(modifier = Modifier.height(16.dp))
+            ErrorMessageBox(errorMessage)
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         // Кнопка "Register"
@@ -178,29 +207,12 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             text = "Registration",
             icon = null
         )
-//        Button(
-//            onClick = {
-//                coroutineScope.launch {
-//                    val signUpData = SignUpData(fullName, username, password, email, dateOfBirth)
-//                    viewModel.createProfile(signUpData)
-//                }
-//            },
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            Text("Register")
-//        }
         Spacer(modifier = Modifier.height(16.dp))
         DefaultButton(
             onClick = { onNavigateToLogin()},
             text = "Login",
             icon = null
         )
-//        Button(
-//            onClick = onNavigateToLogin,
-//            modifier = Modifier.padding(top = 16.dp)
-//        ) {
-//            Text("Открыть login ")
-//        }
 
         LaunchedEffect(Unit) {
             viewModel.registrationEvent.collect { event ->

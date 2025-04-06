@@ -216,10 +216,10 @@ fun ProfileContent(
                     navController.navigate(Screen.Reviews.route(profileId))
                 }) {
                 StarRating(profile.ratingWithCount.averageRating)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = profile.ratingWithCount.count.toString(),
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "(${profile.ratingWithCount.count.toString()})",
                     color = Color.Gray,
-                    fontSize = 21.sp)
+                    fontSize = 14.sp)
             }
 
 
@@ -253,8 +253,10 @@ fun ProfileContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.5f))
-                    .clickable { onShowReviewChange(!showReview)
-                        combinedVisible = true}
+                    .clickable {
+                        onShowReviewChange(!showReview)
+                        combinedVisible = true
+                    }
 
 
             )
@@ -266,7 +268,9 @@ fun ProfileContent(
             ) {
 
                 ReviewDialog(
-                    modifier = Modifier.fillMaxSize().zIndex(2f),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zIndex(2f),
                     onSuccess = {
                         onShowReviewChange(!showReview)
                         combinedVisible = true },

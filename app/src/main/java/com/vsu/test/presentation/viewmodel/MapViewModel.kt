@@ -1,12 +1,18 @@
 package com.vsu.test.presentation.viewmodel
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.PointF
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vsu.test.R
+import com.vsu.test.R.drawable.ic_dot_rose_24dp
+import com.vsu.test.R.drawable.ic_lightroom
 import com.vsu.test.data.api.model.dto.LightRoomDTO
-import com.vsu.test.data.storage.VisitorStorage
+import com.vsu.test.data.storage.TokenManager
+import com.vsu.test.domain.usecase.GetCurrentVisitorByProfileIdUseCase
 import com.vsu.test.domain.usecase.LightRoomUseCase
 import com.vsu.test.utils.NetworkResult
 import com.yandex.mapkit.Animation
@@ -36,7 +42,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val lightRoomUseCase: LightRoomUseCase,
-    private val visitorStorage: VisitorStorage
+    private val tokenManager: TokenManager,
+    private val getCurrentVisitorByProfileIdUseCase: GetCurrentVisitorByProfileIdUseCase
 ) : ViewModel(), UserLocationObjectListener, CameraListener {
     private val _visibleArea = MutableStateFlow<BoundingBox?>(null)
     val points = MutableStateFlow<List<LightRoomDTO>>(emptyList())
@@ -49,6 +56,7 @@ class MapViewModel @Inject constructor(
     var permissionLocation = false
     var followUserLocation = false
     val userCoordinates = MutableStateFlow<Point?>(null)
+
 
     init {
         _visibleArea
@@ -67,6 +75,7 @@ class MapViewModel @Inject constructor(
         userLocationLayer.isVisible = true
         userLocationLayer.isHeadingEnabled = true
         userLocationLayer.setObjectListener(this)
+        userLocationLayer.isHeadingEnabled = false
         mapView.mapWindow.map.addCameraListener(this)
         cameraUserPosition()
         permissionLocation = true
@@ -84,9 +93,11 @@ class MapViewModel @Inject constructor(
     fun updateVisibleArea(box: BoundingBox) {
         _visibleArea.value = box
     }
+
     fun getCurrentUserCoordinates(): Point? {
         return userLocationLayer.cameraPosition()?.target
     }
+
     /** Загрузка точек в видимой области */
     private fun loadPoints(box: BoundingBox) {
         viewModelScope.launch {
@@ -125,15 +136,24 @@ class MapViewModel @Inject constructor(
 
     /** Обработка добавления объекта местоположения пользователя */
     override fun onObjectAdded(userLocationView: UserLocationView) {
+        val originalBitmap = BitmapFactory.decodeResource(
+            mapView!!.context.resources,
+            R.drawable.ic_position
+        )
+
+        val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, 32, 32, true)
+
+        userLocationView.arrow.setIcon(
+            ImageProvider.fromBitmap(scaledBitmap)
+        )
+//        userLocationView.arrow.setIcon(
+//            ImageProvider.fromResource(mapView!!.context, R.drawable.ic_position)
+//        )
+        userLocationView.pin.setIcon(
+            ImageProvider.fromBitmap(scaledBitmap)
+        )
+        userLocationView.accuracyCircle.fillColor = android.graphics.Color.TRANSPARENT
         setAnchor()
-        val bitmap = ImageProvider.fromResource(mapView!!.context, R.drawable.ic_dot_rose_24dp)
-        userLocationView.apply {
-            pin.setIcon(bitmap)
-            pin.setIconStyle(IconStyle().setFlat(true))
-            arrow.setIcon(bitmap)
-            arrow.setIconStyle(IconStyle().setFlat(true))
-            accuracyCircle.fillColor = ActivityCompat.getColor(mapView!!.context, R.color.colorAccuracyCircle)
-        }
     }
 
     override fun onObjectRemoved(p0: UserLocationView) {
@@ -181,9 +201,11 @@ class MapViewModel @Inject constructor(
         userLocationLayer.resetAnchor()
     }
 
-    fun checkProfileLightRoom(): Boolean{
+    fun checkVisitorInfo(): Boolean {
+        viewModelScope.launch {
+            getCurrentVisitorByProfileIdUseCase.invoke(tokenManager.getId())
 
-        val visitorInfo = visitorStorage.getVisitorInfo()
-        return visitorStorage.getVisitorId() != null
+        }
+        return false
     }
 }

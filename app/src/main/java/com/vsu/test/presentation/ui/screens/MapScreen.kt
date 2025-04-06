@@ -5,25 +5,25 @@ package com.vsu.test.presentation.ui.screens
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -50,10 +50,9 @@ import androidx.navigation.NavController
 import com.vsu.test.R
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.LightRoomDTO
-import com.vsu.test.domain.model.EventWithLightRoomData
 import com.vsu.test.presentation.ui.components.CRUDEvent
 import com.vsu.test.presentation.ui.components.CombinedActions
-import com.vsu.test.presentation.ui.components.LightRoomBottomSheetContent
+import com.vsu.test.presentation.ui.components.DefaultButton
 import com.vsu.test.presentation.ui.components.LightRoomBottomSheetHandler
 import com.vsu.test.presentation.ui.components.ListItem
 import com.vsu.test.presentation.ui.components.LocationButton
@@ -168,7 +167,7 @@ fun MapScreen(
                     onDismiss = {
                         selectedLightRoomDTO = null
                     },
-                    endsAfter = TimeUtils.formatTimeDifference(details.lightRoom.startTime),
+                    endsAfter = TimeUtils.formatTimeDifference(details.lightRoom.endTime),
                     navController = navController
                 )
             }
@@ -229,6 +228,7 @@ fun MapControls(
     val isLoading by eventViewModel.loading.collectAsState(initial = false)
     val error by eventViewModel.error.collectAsState()
     val context = LocalContext.current
+    val profileHasEvent = eventViewModel.profileHasEvent.collectAsState()
 
     LaunchedEffect(error) {
         if (error != null) {
@@ -255,7 +255,7 @@ fun MapControls(
                 .align(Alignment.BottomEnd)
                 .offset(x = 32.dp, y = (-40).dp),
             leftButton = {
-                if(viewModel.checkProfileLightRoom()){
+                if(viewModel.checkVisitorInfo()){
                     onNavigateToMore()
                 } else {
                     showEventsSheet = true
@@ -282,40 +282,57 @@ fun MapControls(
                         if (isLoading) {
                             LoadingScreen()
                         } else {
-                            if (events.isEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Тут пока пусто",
-                                        fontSize = 18.sp,
-                                        color = Color.Gray
+                            if (profileHasEvent.value ){
+                                Column(modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("You already have an event created")
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    DefaultButton(
+                                        onClick = onNavigateToMore,
+                                        text = "Open",
+                                        icon = null
                                     )
                                 }
-                            } else {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
 
-                                ) {
-                                    items(events, key = { it.id }) { event ->
-                                        ListItem(
-                                            eventDTO = event,
-                                            onClick = {
-                                                selectedEvent = event
-                                                sheetContent = "edit"
-                                            },
-                                            onCloseClick = {
-                                                eventViewModel.deleteEvent(event.id)
-                                            }
+                            } else {
+                                if (events.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Тут пока пусто",
+                                            fontSize = 18.sp,
+                                            color = Color.Gray
                                         )
+                                    }
+                                } else {
+                                    LazyColumn(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp)
+
+                                    ) {
+                                        items(events, key = { it.id }) { event ->
+                                            ListItem(
+                                                eventDTO = event,
+                                                onClick = {
+                                                    eventViewModel.getImagesUrlsByEventId(event.id)
+                                                    selectedEvent = event
+                                                    sheetContent = "edit"
+                                                },
+                                                onCloseClick = {
+                                                    eventViewModel.deleteEvent(event.id)
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
+
                         }
 
                         Box(modifier = Modifier.fillMaxSize()) {
@@ -347,11 +364,13 @@ fun MapControls(
                                     images
                                 )
                                 sheetContent = "list"
+                                showEventsSheet = false
                             },
                             onCancel = { newEvent, images ->
                                 eventViewModel.createEvent(newEvent, images)
                                 sheetContent = "list"
-                            }
+                            },
+                            eventViewModel = eventViewModel
                         )
                     }
 
@@ -366,11 +385,13 @@ fun MapControls(
                                         viewModel.getCurrentUserCoordinates()
                                     )
                                     sheetContent = "list"
+                                    showEventsSheet = false
                                 },
                                 onCancel = { updatedEvent, images ->
                                     eventViewModel.updateEvent(updatedEvent, images)
                                     sheetContent = "list"
-                                }
+                                },
+                                eventViewModel = eventViewModel
                             )
                         }
                     }

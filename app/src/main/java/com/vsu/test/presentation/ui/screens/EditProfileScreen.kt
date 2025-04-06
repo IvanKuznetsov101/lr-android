@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
@@ -41,7 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -117,7 +121,7 @@ fun EditProfileContent(
     onImagePick: () -> Unit
 ) {
     var showDatePicker by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -140,7 +144,8 @@ fun EditProfileContent(
             contentScale = ContentScale.Crop,
             placeholder = painterResource(R.drawable.placeholder),
             error = painterResource(R.drawable.placeholder),
-            imageLoader = editProfileViewModel.imageLoader
+            imageLoader = editProfileViewModel.imageLoader,
+
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -153,7 +158,19 @@ fun EditProfileContent(
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.Black,
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
             )
         )
 
@@ -167,7 +184,19 @@ fun EditProfileContent(
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.Black,
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
             )
         )
 
@@ -181,7 +210,19 @@ fun EditProfileContent(
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.Black,
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
             )
         )
 
@@ -195,7 +236,14 @@ fun EditProfileContent(
             readOnly = true,
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.Black,
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
             ),
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {

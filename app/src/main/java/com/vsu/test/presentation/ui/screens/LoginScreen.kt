@@ -1,27 +1,20 @@
 package com.vsu.test.presentation.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +30,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vsu.test.presentation.ui.components.DefaultButton
+import com.vsu.test.presentation.ui.components.ErrorMessageBox
 import com.vsu.test.presentation.viewmodel.AuthViewModel
 
 @Composable
@@ -45,6 +39,7 @@ fun LoginScreen(viewModel: AuthViewModel = hiltViewModel(),
                 onNavigateToRegistration:() -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val errorMessage by viewModel.error.collectAsState()
     val context = LocalContext.current
     var focusManager = LocalFocusManager.current
 
@@ -62,14 +57,18 @@ fun LoginScreen(viewModel: AuthViewModel = hiltViewModel(),
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Black,
             ),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
             )
         )
-        Spacer(modifier = Modifier.height(16.dp))
+//        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -77,7 +76,11 @@ fun LoginScreen(viewModel: AuthViewModel = hiltViewModel(),
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Black,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Black,
+                focusedLabelColor = Color.Black,
             ),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -90,6 +93,10 @@ fun LoginScreen(viewModel: AuthViewModel = hiltViewModel(),
                 }
             )
         )
+        if(errorMessage.isNotEmpty()){
+            Spacer(modifier = Modifier.height(16.dp))
+            ErrorMessageBox(errorMessage)
+        }
         Spacer(modifier = Modifier.height(24.dp))
         DefaultButton(
             onClick = { viewModel.login(username, password) },
@@ -103,14 +110,6 @@ fun LoginScreen(viewModel: AuthViewModel = hiltViewModel(),
             icon = null
         )
 
-        LaunchedEffect(Unit) {
-            viewModel.loginEvent.collect { event ->
-                when (event) {
-                    is AuthViewModel.LoginEvent.Success -> onLoginSuccess()
-                    is AuthViewModel.LoginEvent.Error ->
-                        Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
+
     }
 }

@@ -1,7 +1,5 @@
 package com.vsu.test.data.api.model.dto
 
-import java.time.LocalDate
-
 data class ReviewWithProfile(
     var id: Long,
     var fromProfileId: Long,

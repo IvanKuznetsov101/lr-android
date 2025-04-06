@@ -29,7 +29,7 @@ class RegistrationViewModel @Inject constructor(
 
     private val _registrationEvent = MutableSharedFlow<RegistrationEvent>()
     val registrationEvent: SharedFlow<RegistrationEvent> = _registrationEvent
-    val error = MutableStateFlow<String?>(null)
+    val error = MutableStateFlow<String>("")
 
     sealed class RegistrationEvent {
         object Success : RegistrationEvent()
@@ -38,14 +38,19 @@ class RegistrationViewModel @Inject constructor(
 
     fun createProfile(signUpData: SignUpData) {
         viewModelScope.launch {
-
-            val response = createProfileUseCase.invoke(signUpData)
-            if (response is NetworkResult.Success){
-                _registrationEvent.emit(RegistrationEvent.Success)
-            }
-            else{
-                _registrationEvent.emit(RegistrationEvent.Error(response.message ?: "Error"))
-            }
+           try{
+               val response = createProfileUseCase.invoke(signUpData)
+               if (response is NetworkResult.Success){
+                   _registrationEvent.emit(RegistrationEvent.Success)
+               }
+               else{
+                   error.value = response.message ?: "Error"
+                   _registrationEvent.emit(RegistrationEvent.Error(response.message ?: "Error"))
+               }
+           }
+           catch (e: Exception){
+                error.value = e.message.toString()
+           }
         }
     }
 }

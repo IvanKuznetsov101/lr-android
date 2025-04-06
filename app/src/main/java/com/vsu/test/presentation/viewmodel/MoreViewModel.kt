@@ -4,20 +4,15 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
-import android.location.Location
 import android.util.Log
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.vsu.test.data.api.model.dto.LightRoomDTO
 import com.vsu.test.data.storage.TokenManager
-import com.vsu.test.data.storage.VisitorStorage
 import com.vsu.test.domain.model.LocationData
 import com.vsu.test.domain.usecase.CreateVisitorUseCase
 import com.vsu.test.domain.usecase.DeleteLightRoomByIdUseCase
@@ -38,7 +33,6 @@ class MoreViewModel @Inject constructor(
     private var fusedLocationClient: FusedLocationProviderClient,
     private val tokenManager: TokenManager,
     private val createVisitorUseCase: CreateVisitorUseCase,
-    private val visitorStorage: VisitorStorage,
     private val updateEndTimeVisitorUseCase: UpdateEndTimeVisitorUseCase
 ) : ViewModel() {
 
@@ -75,13 +69,6 @@ class MoreViewModel @Inject constructor(
                     val profileId = tokenManager.getId()
                     val locationDto = LocationData(profileId, location.latitude, location.longitude)
                     _eventState.value = getEventStateUseCase(locationDto)
-//                    if (_eventState.value is MoreState.NoEvents){
-//                        if(visitorStorage.getVisitorId()!= null){
-//                            val visitorId = visitorStorage.getVisitorId()
-//                            visitorId?.let { updateEndTimeVisitorUseCase.invoke(it) }
-//                            visitorStorage.clearVisitorInfo()
-//                        }
-//                    }
                 }
             }
         }
@@ -95,8 +82,7 @@ class MoreViewModel @Inject constructor(
     fun createVisitor(lightRoomDTO: LightRoomDTO, context: Context){
         viewModelScope.launch {
             val profileId = tokenManager.getId()
-            val visitorId = visitorStorage.getVisitorInfo()?.visitorId
-            createVisitorUseCase.invoke(profileId, lightRoomDTO.id, visitorId)
+            createVisitorUseCase.invoke(profileId, lightRoomDTO.id)
             updateState(context)
         }
     }

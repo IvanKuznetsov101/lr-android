@@ -199,17 +199,17 @@ fun DefaultButton(
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.stars_bacground),
+            painter = painterResource(id = R.drawable.star_background_max),
             contentDescription = null,
-            contentScale = ContentScale.FillBounds, // Растягиваем картинку
-            alignment = Alignment.Center, // Центрируем
+            contentScale = ContentScale.Crop, // Используем Crop, чтобы сохранить пропорции
+            alignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(64.dp))
                 .graphicsLayer(
                     translationX = offsetX,
                     translationY = offsetY,
-                    scaleX = scale, // Увеличиваем масштаб, чтобы избежать обрезки
+                    scaleX = scale,
                     scaleY = scale
                 )
         )

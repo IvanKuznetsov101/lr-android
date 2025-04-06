@@ -7,11 +7,10 @@ import com.vsu.test.utils.NetworkResult
 import javax.inject.Inject
 
 class CreateVisitorUseCase @Inject constructor(
-    private val visitorRepository: VisitorRepository,
-    private val lightRoomRepository: LightRoomRepository
+    private val visitorRepository: VisitorRepository
 ) {
-    suspend fun invoke(profileId: Long, lightRoomId: Long, visitorId: Long?): NetworkResult<VisitorDTO> {
-        return visitorRepository.createVisitor(profileId, lightRoomId, visitorId)
+    suspend fun invoke(profileId: Long, lightRoomId: Long): NetworkResult<VisitorDTO> {
+        return visitorRepository.createVisitor(profileId, lightRoomId)
     }
 
 }

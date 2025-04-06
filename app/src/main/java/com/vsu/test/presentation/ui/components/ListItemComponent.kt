@@ -39,9 +39,9 @@ fun ListItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp) // Отступы, чтобы тень не обрезалась
-            .shadow(2.dp, RoundedCornerShape(16.dp)) // Тень применяется к Box
-            .clip(RoundedCornerShape(16.dp)) // Обрезаем углы Box
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
     ) {
         Row(

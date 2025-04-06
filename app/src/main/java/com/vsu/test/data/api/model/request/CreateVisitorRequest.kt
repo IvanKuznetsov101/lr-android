@@ -7,6 +7,4 @@ data class CreateVisitorRequest(
     val profileId: Long,
     @SerializedName("lightRoomId")
     val lightRoomId: Long,
-    @SerializedName("visitorId")
-    val visitorId: Long?
 )

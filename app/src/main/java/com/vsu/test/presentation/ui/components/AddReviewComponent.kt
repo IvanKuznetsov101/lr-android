@@ -123,7 +123,7 @@ fun ReviewDialogContent(
                 ) {
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Оставить отзыв",
+                        text = "Leave a review",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Normal
                     )
@@ -157,7 +157,7 @@ fun ReviewDialogContent(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row {
                         for (i in 1..5) {
@@ -177,12 +177,16 @@ fun ReviewDialogContent(
                     OutlinedTextField(
                         value = reviewWithProfile.text,
                         onValueChange = { reviewsViewModel.updateText(it)},
-                        placeholder = { Text("Ваш отзыв") },
+                        label = { Text("Your feedback") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(32.dp),
                         colors = TextFieldDefaults.colors(
                             focusedIndicatorColor = Color.Black,
-                            unfocusedIndicatorColor = Color.Gray
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            cursorColor = Color.White,
+                            focusedLabelColor = Color.Black,
                         )
                     )
                     if (errorMessage != null){

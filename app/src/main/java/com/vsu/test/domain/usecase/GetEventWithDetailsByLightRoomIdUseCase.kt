@@ -1,6 +1,7 @@
 package com.vsu.test.domain.usecase
 
 
+import VisitorInfo
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.LightRoomDTO
 import com.vsu.test.data.repository.EventRepository
@@ -10,8 +11,6 @@ import com.vsu.test.data.repository.ProfileRepository
 import com.vsu.test.data.repository.ReviewRepository
 import com.vsu.test.data.repository.VisitorRepository
 import com.vsu.test.data.storage.TokenManager
-import com.vsu.test.data.storage.VisitorStorage
-import com.vsu.test.data.storage.VisitorInfo
 import com.vsu.test.domain.model.EventWithDetails
 import com.vsu.test.domain.model.ProfileWithDetails
 import com.vsu.test.utils.NetworkResult
@@ -21,7 +20,6 @@ class GetEventWithDetailsByLightRoomIdUseCase @Inject constructor(
     private val eventRepository: EventRepository,
     private val profileRepository: ProfileRepository,
     private val lightRoomRepository: LightRoomRepository,
-    private val visitorIdStorage: VisitorStorage,
     private val visitorRepository: VisitorRepository,
     private val tokenManager: TokenManager,
     private val imageRepository: ImageRepository,
@@ -50,8 +48,6 @@ class GetEventWithDetailsByLightRoomIdUseCase @Inject constructor(
             eventImagesUrls = eventImagesUrls
         )
     }
-
-
     private suspend fun getLightRoomByEventId(eventId: Long): LightRoomDTO? {
         val response = lightRoomRepository.getLightRoomByEventID(eventId)
         return if (response is NetworkResult.Success) response.data else null
@@ -82,24 +78,15 @@ class GetEventWithDetailsByLightRoomIdUseCase @Inject constructor(
     }
 
     private suspend fun getVisitorState(profileId: Long): VisitorInfo {
-        val storedVisitorId = visitorIdStorage.getVisitorInfo()?.visitorId
         val visitorResponse = visitorRepository.getCurrentVisitorByProfileId(profileId)
-
         if (visitorResponse is NetworkResult.Success) {
             val newVisitorInfo = VisitorInfo(
                 visitorId = visitorResponse.data!!.idVisitor,
                 lightRoomId = visitorResponse.data.idLightRoom,
                 profileId = visitorResponse.data.idProfile
             )
-            if (storedVisitorId != newVisitorInfo.visitorId) {
-                visitorIdStorage.clearVisitorInfo()
-                visitorIdStorage.saveVisitorInfo(newVisitorInfo)
-            }
             return newVisitorInfo
         }
-
-        return VisitorInfo(visitorId = null, lightRoomId = null, profileId = null).also {
-            visitorIdStorage.saveVisitorInfo(it)
-        }
+        return VisitorInfo(null, null, null)
     }
 }

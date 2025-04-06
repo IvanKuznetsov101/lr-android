@@ -1,7 +1,6 @@
 package com.vsu.test.data.repository
 
 import com.vsu.test.data.api.ReviewService
-import com.vsu.test.data.api.model.dto.ReviewDTO
 import com.vsu.test.data.api.model.dto.ReviewWithProfile
 import com.vsu.test.data.api.model.request.CreateReviewRequest
 import com.vsu.test.utils.BaseApiResponse

@@ -2,6 +2,8 @@ package com.vsu.test.data.api
 
 import okhttp3.MultipartBody
 import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -28,6 +30,8 @@ interface ImageService {
         @Query("eventId") eventId: Long?
     ): Response<String>
 
+    @DELETE("/api/images/{ids}")
+    suspend fun deleteImages(@Path("ids") ids: String): Response<List<Long>>
     @GET("/api/images/{imageId}")
     suspend fun downloadImage(@Path("imageId") imageId: Long): Response<String>
 
