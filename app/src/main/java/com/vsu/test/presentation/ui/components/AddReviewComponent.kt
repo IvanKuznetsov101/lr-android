@@ -52,6 +52,7 @@ import coil.compose.AsyncImage
 import com.vsu.test.R
 import com.vsu.test.Screen
 import com.vsu.test.presentation.viewmodel.ReviewsViewModel
+
 @Composable
 fun ReviewDialog(
     modifier: Modifier,
@@ -73,14 +74,17 @@ fun ReviewDialog(
                 modifier = modifier
             )
         }
+
         is ReviewsViewModel.ReviewsState.Error -> {
             Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
 
         }
+
         ReviewsViewModel.ReviewsState.Loading ->
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
+
         else -> Unit
     }
 }
@@ -92,12 +96,15 @@ fun ReviewDialogContent(
     onDismiss: () -> Unit,
     navController: NavController,
     modifier: Modifier
-){
+) {
     val reviewsState by reviewsViewModel.reviewsState.collectAsState()
-    val reviewWithProfile = (reviewsState as? ReviewsViewModel.ReviewsState.EditReview)?.review ?: return
-    val errorMessage = (reviewsState as? ReviewsViewModel.ReviewsState.EditReview)?.validationErrorMessage
+    val reviewWithProfile =
+        (reviewsState as? ReviewsViewModel.ReviewsState.EditReview)?.review ?: return
+    val errorMessage =
+        (reviewsState as? ReviewsViewModel.ReviewsState.EditReview)?.validationErrorMessage
     Box(
-        modifier = modifier) {
+        modifier = modifier
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -176,7 +183,7 @@ fun ReviewDialogContent(
 
                     OutlinedTextField(
                         value = reviewWithProfile.text,
-                        onValueChange = { reviewsViewModel.updateText(it)},
+                        onValueChange = { reviewsViewModel.updateText(it) },
                         label = { Text("Your feedback") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(32.dp),
@@ -189,7 +196,7 @@ fun ReviewDialogContent(
                             focusedLabelColor = Color.Black,
                         )
                     )
-                    if (errorMessage != null){
+                    if (errorMessage != null) {
                         Spacer(modifier = Modifier.height(16.dp))
                         ErrorMessageBox(errorMessage)
                     }
@@ -201,9 +208,11 @@ fun ReviewDialogContent(
                 .align(Alignment.BottomEnd)
                 .offset(x = 32.dp, y = (-40).dp)
                 .zIndex(1f),
-            leftButton = { reviewsViewModel.submitReview {
-                onSuccess()
-            } },
+            leftButton = {
+                reviewsViewModel.submitReview {
+                    onSuccess()
+                }
+            },
             rightButton = { onDismiss() },
             Icons.Default.Done,
             Icons.Default.ArrowBack

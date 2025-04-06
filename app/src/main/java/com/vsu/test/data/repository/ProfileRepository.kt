@@ -1,6 +1,5 @@
 package com.vsu.test.data.repository
 
-import com.vsu.test.Screen
 import com.vsu.test.data.api.ProfileService
 import com.vsu.test.data.api.model.dto.EventDTO
 import com.vsu.test.data.api.model.dto.ExtendedProfileDTO
@@ -17,7 +16,7 @@ import javax.inject.Inject
 
 class ProfileRepository @Inject constructor(
     private val profileService: ProfileService
-): BaseApiResponse() {
+) : BaseApiResponse() {
     suspend fun createProfile(signUpData: SignUpData): NetworkResult<ProfileDTO> {
         val request = SignUpRequest(
             fullName = signUpData.fullName,
@@ -29,25 +28,31 @@ class ProfileRepository @Inject constructor(
 
         return safeApiCall { profileService.createProfile(request) }
     }
+
     suspend fun updateProfileCoordinatesAndGetIds(locationData: LocationData): NetworkResult<List<Long>> {
         val request = UpdateProfileCoordinatesRequest(
             id = locationData.id,
             latitude = locationData.latitude,
-            longitude = locationData.longitude)
+            longitude = locationData.longitude
+        )
         return safeApiCall { profileService.updateProfileCoordinatesAndGetIds(request) }
     }
+
     suspend fun updateProfileCoordinatesAndGetEvents(locationData: LocationData): NetworkResult<List<EventDTO>> {
         val request = UpdateProfileCoordinatesRequest(
             id = locationData.id,
             latitude = locationData.latitude,
-            longitude = locationData.longitude)
+            longitude = locationData.longitude
+        )
         return safeApiCall { profileService.updateProfileCoordinatesAndGetEvents(request) }
     }
+
     suspend fun getProfileById(id: Long) = safeApiCall { profileService.getProfileById(id) }
 
     suspend fun getFullProfileById(id: Long) = safeApiCall { profileService.getFullProfileById(id) }
 
-    suspend fun getProfileByEventId(id: Long) = safeApiCall { profileService.getProfileByEventId(id) }
+    suspend fun getProfileByEventId(id: Long) =
+        safeApiCall { profileService.getProfileByEventId(id) }
 
     suspend fun updateProfile(extendedProfileDTO: ExtendedProfileDTO): NetworkResult<ProfileDTO> {
         val profileId = extendedProfileDTO.id

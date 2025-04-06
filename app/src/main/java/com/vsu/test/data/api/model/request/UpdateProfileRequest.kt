@@ -1,7 +1,6 @@
 package com.vsu.test.data.api.model.request
 
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDate
 
 data class UpdateProfileRequest (
     @SerializedName("fullName")

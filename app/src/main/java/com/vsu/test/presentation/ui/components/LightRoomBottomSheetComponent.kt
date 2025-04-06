@@ -47,7 +47,6 @@ import com.vsu.test.Screen
 import com.vsu.test.domain.model.EventWithDetails
 import com.vsu.test.presentation.viewmodel.EventViewModel
 import com.vsu.test.presentation.viewmodel.ProfileViewModel
-import com.yandex.mapkit.logo.VerticalAlignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -130,7 +129,8 @@ fun LightRoomBottomSheetContent(
             ) {
                 repeat(imagesUrls.size) { index ->
                     val colorIn = if (pagerState.currentPage == index) Color.Black else Color.White
-                    val colorAround = if (pagerState.currentPage == index) Color.White else Color.Black
+                    val colorAround =
+                        if (pagerState.currentPage == index) Color.White else Color.Black
                     Box(
                         modifier = Modifier
                             .size(16.dp) // внешний круг

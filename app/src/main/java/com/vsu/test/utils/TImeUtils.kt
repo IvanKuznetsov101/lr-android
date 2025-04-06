@@ -4,11 +4,8 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 
 object TimeUtils {
-    private const val DEFAULT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
-
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
 
     fun formatTimeDifference(end: String): String {
@@ -25,6 +22,7 @@ object TimeUtils {
             "Ошибка формата даты"
         }
     }
+
     fun formatTimeDifferenceNow(end: String): String {
         return try {
             val startDateTime = LocalDateTime.now(ZoneOffset.UTC) // Текущее время в UTC

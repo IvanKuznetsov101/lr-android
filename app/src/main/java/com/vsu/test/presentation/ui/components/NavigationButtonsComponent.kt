@@ -1,7 +1,6 @@
 package com.vsu.test.presentation.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,31 +33,6 @@ import androidx.compose.ui.unit.sp
 import com.vsu.test.R
 import kotlin.random.Random
 
-
-//@Composable
-//fun LocationButton(modifier: Modifier = Modifier,
-//                   onClick: () -> Unit) {
-//    Row(
-//        modifier = modifier
-//            .height(56.dp)
-//            .clip(RoundedCornerShape(28.dp))
-//            .background(
-//                Brush.horizontalGradient(
-//                    listOf(Color(0xFF202044), Color(0xFF7B4D78))
-//                )
-//            )
-//            .padding(horizontal = 16.dp),
-//        verticalAlignment = Alignment.CenterVertically
-//    ) {
-//        Icon(
-//            imageVector = Icons.Default.MyLocation,
-//            contentDescription = "Location",
-//            tint = Color.White,
-//            modifier = Modifier.clickable(onClick = onClick)
-//        )
-//        Spacer(modifier = Modifier.width(24.dp))
-//    }
-//}
 @Composable
 fun LocationButton(
     modifier: Modifier = Modifier,
@@ -96,6 +69,7 @@ fun LocationButton(
         }
     }
 }
+
 @Composable
 fun CombinedActions(
     modifier: Modifier = Modifier,
@@ -144,6 +118,7 @@ fun CombinedActions(
         }
     }
 }
+
 @Composable
 fun BackButton(
     modifier: Modifier = Modifier,
@@ -180,6 +155,7 @@ fun BackButton(
         }
     }
 }
+
 @Composable
 fun DefaultButton(
     onClick: () -> Unit,

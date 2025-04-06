@@ -10,8 +10,9 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp
-class TestApp : Application(), Configuration.Provider{
-    @Inject lateinit var workerFactory: HiltWorkerFactory
+class TestApp : Application(), Configuration.Provider {
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
         super.onCreate()
@@ -19,6 +20,7 @@ class TestApp : Application(), Configuration.Provider{
         MapKitFactory.initialize(this)
         Log.d("TestApp", "workerFactory: $workerFactory")
     }
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)

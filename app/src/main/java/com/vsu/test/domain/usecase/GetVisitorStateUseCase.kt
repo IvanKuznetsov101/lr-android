@@ -8,13 +8,13 @@ import javax.inject.Inject
 
 class GetVisitorStateUseCase @Inject constructor(
     private val visitorRepository: VisitorRepository,
-    private val tokenManager: TokenManager) {
+    private val tokenManager: TokenManager
+) {
     suspend operator fun invoke(): VisitorDTO? {
-       val visitorResponse = visitorRepository.getCurrentVisitorByProfileId(tokenManager.getId())
-        if (visitorResponse is NetworkResult.Success && visitorResponse.data != null){
+        val visitorResponse = visitorRepository.getCurrentVisitorByProfileId(tokenManager.getId())
+        if (visitorResponse is NetworkResult.Success && visitorResponse.data != null) {
             return visitorResponse.data
-        }
-        else {
+        } else {
             return null
         }
     }

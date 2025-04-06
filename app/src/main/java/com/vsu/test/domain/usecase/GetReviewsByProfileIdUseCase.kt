@@ -11,7 +11,7 @@ class GetReviewsByProfileIdUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(profileId: Long): List<ReviewWithProfile>? {
         val reviews = reviewRepository.getReviewsByProfileId(profileId)
-        if(reviews is NetworkResult.Success){
+        if (reviews is NetworkResult.Success) {
             return reviews.data
         }
         return emptyList()

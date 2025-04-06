@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 class DeleteEventUseCase @Inject constructor(
 
-private val eventRepository: EventRepository
+    private val eventRepository: EventRepository
 ) {
     suspend fun invoke(id: Long) = eventRepository.deleteEvent(id = id)
 }

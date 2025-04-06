@@ -9,19 +9,22 @@ import javax.inject.Inject
 
 class VisitorRepository @Inject constructor(
     private val visitorService: VisitorService
-): BaseApiResponse() {
+) : BaseApiResponse() {
 
-    suspend fun createVisitor(profileId: Long, lightRoomId: Long): NetworkResult<VisitorDTO>{
+    suspend fun createVisitor(profileId: Long, lightRoomId: Long): NetworkResult<VisitorDTO> {
         val visitorRequest = CreateVisitorRequest(profileId, lightRoomId)
         return safeApiCall { visitorService.createVisitor(visitorRequest) }
     }
-    suspend fun updateEndTimeVisitor(visitorId: Long): NetworkResult<VisitorDTO>{
+
+    suspend fun updateEndTimeVisitor(visitorId: Long): NetworkResult<VisitorDTO> {
         return safeApiCall { visitorService.updateEndTimeVisitor(visitorId) }
     }
-    suspend fun getCurrentVisitorByProfileId(profileId: Long): NetworkResult<VisitorDTO>{
+
+    suspend fun getCurrentVisitorByProfileId(profileId: Long): NetworkResult<VisitorDTO> {
         return safeApiCall { visitorService.getVisitorByProfileId(profileId) }
     }
-    suspend fun getVisitorCountByLightRoomId(lightRoomId: Long): NetworkResult<Long>{
-        return safeApiCall { visitorService.getVisitorCountByLightRoomId(lightRoomId)}
+
+    suspend fun getVisitorCountByLightRoomId(lightRoomId: Long): NetworkResult<Long> {
+        return safeApiCall { visitorService.getVisitorCountByLightRoomId(lightRoomId) }
     }
 }

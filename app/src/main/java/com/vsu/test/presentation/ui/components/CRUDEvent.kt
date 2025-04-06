@@ -17,15 +17,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -43,9 +40,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.vsu.test.data.api.model.dto.EventDTO
-import com.vsu.test.domain.model.EventWithDetails
-import com.vsu.test.domain.usecase.MoreState
-import com.vsu.test.presentation.ui.screens.LoadingScreen
 import com.vsu.test.presentation.viewmodel.EventViewModel
 
 @Composable
@@ -58,7 +52,6 @@ fun CRUDEvent(
     var title by remember { mutableStateOf(eventDTO?.title ?: "") }
     var description by remember { mutableStateOf(eventDTO?.description ?: "") }
     var ageLimit by remember { mutableStateOf(eventDTO?.ageLimit ?: 0) }
-//    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
     val focusManager = LocalFocusManager.current
 
     val currentImages by eventViewModel.currentImages.collectAsState()
@@ -72,7 +65,7 @@ fun CRUDEvent(
         OutlinedTextField(
             value = title,
             modifier = Modifier.fillMaxWidth(),
-            onValueChange = { title = it},
+            onValueChange = { title = it },
             label = { Text("Название события") },
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
@@ -98,7 +91,7 @@ fun CRUDEvent(
         OutlinedTextField(
             value = description,
             modifier = Modifier.fillMaxWidth(),
-            onValueChange = { description = it},
+            onValueChange = { description = it },
             label = { Text("Название события") },
             shape = RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
@@ -122,7 +115,7 @@ fun CRUDEvent(
         AgeRatingDropdown(
             ageLimit = ageLimit,
             onAgeLimitChange = { newAgeLimit ->
-                ageLimit = newAgeLimit // Обновляем ageLimit
+                ageLimit = newAgeLimit
             }
         )
         PhotoPicker(
@@ -165,7 +158,7 @@ fun CRUDEvent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgeRatingDropdown(
-    ageLimit: Int, 
+    ageLimit: Int,
     onAgeLimitChange: (Int) -> Unit
 ) {
     val ageRatings = listOf(0, 6, 12, 16, 18, 21, 25, 30)
@@ -191,7 +184,7 @@ fun AgeRatingDropdown(
                 .menuAnchor()
                 .background(
                     color = Color(0xFFFFFFFF),
-                    shape = RoundedCornerShape(32.dp) // Закругление углов для TextField
+                    shape = RoundedCornerShape(32.dp)
                 )
         )
 
@@ -201,7 +194,7 @@ fun AgeRatingDropdown(
             modifier = Modifier
                 .background(
                     color = Color.White,
-                    shape = RoundedCornerShape(12.dp) // Закругление углов для DropdownMenu
+                    shape = RoundedCornerShape(12.dp)
                 )
         ) {
             ageRatings.forEach { rating ->
@@ -218,20 +211,19 @@ fun AgeRatingDropdown(
     }
 
 }
-//data class Images (
-//    var imagesUris : List<String>?,
-//    var imagesUrls: List<ImageUrl>?
-//)
-data class ImageUrl (
+
+data class ImageUrl(
     val imageUrl: String,
     val isDelete: Boolean = false
 )
+
 sealed class CurrentImages {
     object Loading : CurrentImages()
     data class Images(
         var imagesUris: List<Uri>? = null,
         var imagesUrls: List<ImageUrl>? = null
     ) : CurrentImages()
-    object NoImages: CurrentImages()
+
+    object NoImages : CurrentImages()
 
 }

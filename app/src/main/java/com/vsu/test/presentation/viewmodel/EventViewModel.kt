@@ -18,8 +18,6 @@ import com.vsu.test.domain.usecase.GetCurrentVisitorByProfileIdUseCase
 import com.vsu.test.domain.usecase.GetEventByLightRoomIdUseCase
 import com.vsu.test.domain.usecase.GetEventWithDetailsByLightRoomIdUseCase
 import com.vsu.test.domain.usecase.GetImagesUrlsByEventIdUseCase
-import com.vsu.test.domain.usecase.GetVisitorStateUseCase
-import com.vsu.test.domain.usecase.MoreState
 import com.vsu.test.domain.usecase.UpdateAndDeleteImagesUseCase
 import com.vsu.test.domain.usecase.UpdateEventUseCase
 import com.vsu.test.domain.usecase.UpdateImagesUseCase
@@ -58,7 +56,7 @@ class EventViewModel @Inject constructor(
     val event = MutableStateFlow<EventDTO>(EventDTO(0, null, null, null))
     val loading = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
-    private  val _eventWithDetails = MutableStateFlow<EventWithDetails?>(null)
+    private val _eventWithDetails = MutableStateFlow<EventWithDetails?>(null)
     val eventWithDetails: StateFlow<EventWithDetails?> = _eventWithDetails
     val currentImages = MutableStateFlow<CurrentImages>(CurrentImages.NoImages)
 
@@ -66,7 +64,8 @@ class EventViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 loading.value = true
-                _eventWithDetails.value = getEventWithDetailsByLightRoomIdUseCase.invoke(lightRoomDTO)
+                _eventWithDetails.value =
+                    getEventWithDetailsByLightRoomIdUseCase.invoke(lightRoomDTO)
             } catch (e: Exception) {
                 error.value = e.message
             } finally {
@@ -75,7 +74,8 @@ class EventViewModel @Inject constructor(
         }
 
     }
-    fun getImagesUrlsByEventId(eventId: Long){
+
+    fun getImagesUrlsByEventId(eventId: Long) {
         viewModelScope.launch {
             currentImages.value = CurrentImages.Loading
             val imagesUrls = getImagesUrlsByEventIdUseCase.invoke(eventId)
@@ -85,6 +85,7 @@ class EventViewModel @Inject constructor(
             currentImages.value = CurrentImages.Images(imagesUris = null, imagesUrls = images)
         }
     }
+
     fun addSelectedUris(newUris: List<Uri>) {
         viewModelScope.launch {
             val current = currentImages.value
@@ -121,12 +122,14 @@ class EventViewModel @Inject constructor(
             }
         }
     }
+
     fun loadEvents(id: Long? = tokenManager.getId()) {
         viewModelScope.launch {
             loading.value = true
             try {
-                val visitorResponse = getCurrentVisitorByProfileIdUseCase.invoke(tokenManager.getId())
-                if (visitorResponse != null){
+                val visitorResponse =
+                    getCurrentVisitorByProfileIdUseCase.invoke(tokenManager.getId())
+                if (visitorResponse != null) {
                     events.value = emptyList()
                     profileHasEvent.value = true
                     return@launch
@@ -198,7 +201,7 @@ class EventViewModel @Inject constructor(
                 val response = createEventUseCase.invoke(tokenManager.getId(), eventDTO, true)
                 if (response is NetworkResult.Success) {
                     val createdEvent = response.data ?: eventDTO.copy(id = 0L)
-                    if (images is CurrentImages.Images){
+                    if (images is CurrentImages.Images) {
                         updateAndDeleteImagesUseCase.invoke(
                             images = images,
                             eventId = eventDTO.id,
@@ -213,12 +216,14 @@ class EventViewModel @Inject constructor(
                             ?: throw IllegalStateException("ID события не получено")
                     )
                     loadEvents()
-                    if (lightRoomResponse is NetworkResult.Success){
+                    if (lightRoomResponse is NetworkResult.Success) {
                         val visitorResponse = lightRoomResponse.data?.let {
-                            createVisitorUseCase.invoke(tokenManager.getId(),
-                                it.id)
+                            createVisitorUseCase.invoke(
+                                tokenManager.getId(),
+                                it.id
+                            )
                         }
-                    } else{
+                    } else {
                         error.value = "Ошибка создания LightRoom"
                         Log.e(
                             "EventViewModel",
@@ -247,7 +252,7 @@ class EventViewModel @Inject constructor(
             loading.value = true
             try {
                 val response = updateEventUseCase.invoke(tokenManager.getId(), eventDTO, true)
-                if (images is CurrentImages.Images){
+                if (images is CurrentImages.Images) {
                     updateAndDeleteImagesUseCase.invoke(
                         images = images,
                         eventId = eventDTO.id,

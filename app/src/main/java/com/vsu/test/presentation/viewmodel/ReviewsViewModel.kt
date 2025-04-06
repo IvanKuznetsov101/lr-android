@@ -3,20 +3,14 @@ package com.vsu.test.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
-import com.vsu.test.data.api.model.dto.ExtendedProfileDTO
+
 import com.vsu.test.data.api.model.dto.ReviewWithProfile
 import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.domain.model.ProfileWithDetails
-import com.vsu.test.domain.model.ProfileWithImage
-import com.vsu.test.domain.usecase.CreateProfileUseCase
 import com.vsu.test.domain.usecase.CreateReviewUseCase
-import com.vsu.test.domain.usecase.GetProfileByIdUseCase
 import com.vsu.test.domain.usecase.GetProfileWithDetailsByIdUseCase
 import com.vsu.test.domain.usecase.GetReviewByProfileIdsUseCase
 import com.vsu.test.domain.usecase.GetReviewsByProfileIdUseCase
-import com.vsu.test.domain.usecase.MoreState
-import com.vsu.test.presentation.viewmodel.EditProfileViewModel.EditProfileState
-import com.vsu.test.presentation.viewmodel.ProfileViewModel.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +37,7 @@ class ReviewsViewModel @Inject constructor(
             try {
                 val profile = getProfileWithDetailsByIdUseCase(profileId)
                 val reviews = getReviewsByProfileIdUseCase(profileId)
-                if(profile != null){
+                if (profile != null) {
                     _reviewsState.value = ReviewsState.Success(profile, reviews)
                 }
             } catch (e: Exception) {
@@ -51,7 +45,8 @@ class ReviewsViewModel @Inject constructor(
             }
         }
     }
-    fun loadReviewForEdit(toProfileId: Long){
+
+    fun loadReviewForEdit(toProfileId: Long) {
         viewModelScope.launch {
             _reviewsState.value = ReviewsState.Loading
             try {
@@ -63,6 +58,7 @@ class ReviewsViewModel @Inject constructor(
             }
         }
     }
+
     fun submitReview(onSuccess: () -> Unit) {
         val currentState = _reviewsState.value as? ReviewsState.EditReview ?: return
         viewModelScope.launch {
@@ -104,16 +100,20 @@ class ReviewsViewModel @Inject constructor(
         object Loading : ReviewsState()
         data class Success(
             val profile: ProfileWithDetails,
-            val reviews: List<ReviewWithProfile>?) : ReviewsState()
+            val reviews: List<ReviewWithProfile>?
+        ) : ReviewsState()
+
         data class EditReview(
             val review: ReviewWithProfile,
             val validationErrorMessage: String? = null
         ) : ReviewsState()
+
         data class Error(val message: String) : ReviewsState()
     }
-    sealed class ReviewValidationResult{
+
+    sealed class ReviewValidationResult {
         data class Error(val message: String) : ReviewValidationResult()
-        object Success: ReviewValidationResult()
+        object Success : ReviewValidationResult()
 
     }
 }

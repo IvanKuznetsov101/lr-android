@@ -48,7 +48,7 @@ fun ReviewScreen(
     onBackClick: () -> Unit,
     reviewsViewModel: ReviewsViewModel = hiltViewModel(),
     navController: NavController
-){
+) {
     val state by reviewsViewModel.reviewsState.collectAsState()
     LaunchedEffect(profileId) {
         reviewsViewModel.loadReviews(profileId)
@@ -61,22 +61,27 @@ fun ReviewScreen(
             (state as ReviewsViewModel.ReviewsState.Success).reviews,
             reviewsViewModel,
             onBackClick,
-            navController)
+            navController
+        )
+
         is ReviewsViewModel.ReviewsState.Error -> ErrorScreen((state as ProfileViewModel.ProfileState.Error).message)
         else -> Unit
     }
 }
+
 @Composable
 fun ReviewScreenContent(
     profileWithDetails: ProfileWithDetails,
     reviews: List<ReviewWithProfile>?,
     reviewsViewModel: ReviewsViewModel,
-    onBackClick:() -> Unit,
+    onBackClick: () -> Unit,
     navController: NavController
-){
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(color = Color.White)){
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White)
+    ) {
 
         Column(
             modifier = Modifier
@@ -106,12 +111,14 @@ fun ReviewScreenContent(
                 Column {
                     Text(" ${profileWithDetails.profile.fullName} ")
 
-                    Row{
+                    Row {
                         StarRating(profileWithDetails.ratingWithCount.averageRating)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "(${profileWithDetails.ratingWithCount.count.toString()})",
+                        Text(
+                            text = "(${profileWithDetails.ratingWithCount.count.toString()})",
                             color = Color.Gray,
-                            fontSize = 14.sp)
+                            fontSize = 14.sp
+                        )
                     }
                 }
 
@@ -136,7 +143,7 @@ fun ReviewScreenContent(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .offset(x = 32.dp, y = (-40).dp),
-            button = {onBackClick()}
+            button = { onBackClick() }
         )
     }
 }

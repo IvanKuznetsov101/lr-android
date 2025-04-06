@@ -4,13 +4,9 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
-import com.vsu.test.data.api.model.dto.ExtendedProfileDTO
 import com.vsu.test.data.storage.TokenManager
-import com.vsu.test.domain.model.ProfileWithDetails
 import com.vsu.test.domain.model.ProfileWithImage
 import com.vsu.test.domain.usecase.GetProfileByIdUseCase
-import com.vsu.test.domain.usecase.GetProfileWithDetailsByIdUseCase
-import com.vsu.test.domain.usecase.MoreState
 import com.vsu.test.domain.usecase.UpdateImagesUseCase
 import com.vsu.test.domain.usecase.UpdateProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,7 +41,7 @@ class EditProfileViewModel @Inject constructor(
             val profileId = tokenManager.getId()
             try {
                 val profile = getProfileByIdUseCase(profileId)
-                _editProfileState.value = EditProfileState.Success(profile, profile, )
+                _editProfileState.value = EditProfileState.Success(profile, profile)
 
             } catch (e: Exception) {
                 _editProfileState.value = EditProfileState.Error("Ошибка загрузки: ${e.message}")
@@ -53,7 +49,7 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(){
+    fun updateProfile() {
         viewModelScope.launch {
             val currentState = _editProfileState.value
             if (currentState !is EditProfileState.Success) return@launch
@@ -62,7 +58,11 @@ class EditProfileViewModel @Inject constructor(
             try {
                 updateProfileUseCase.invoke(currentState.editedProfile.profile)
                 val uriList: List<Uri> = _avatarUri.value?.let { listOf(it) } ?: emptyList()
-                updateImagesUseCase.invoke(images = uriList, profileId = currentState.editedProfile.profile.id, eventId = null)
+                updateImagesUseCase.invoke(
+                    images = uriList,
+                    profileId = currentState.editedProfile.profile.id,
+                    eventId = null
+                )
                 _editProfileState.value = EditProfileState.Success(
                     originalProfile = currentState.editedProfile,
                     editedProfile = currentState.editedProfile,
@@ -70,10 +70,12 @@ class EditProfileViewModel @Inject constructor(
                     isSaved = true
                 )
             } catch (e: Exception) {
-                _editProfileState.value = currentState.copy(errorMessage = e.message.toString() ?: "Ошибка отправки")
+                _editProfileState.value =
+                    currentState.copy(errorMessage = e.message.toString() ?: "Ошибка отправки")
             }
         }
     }
+
     fun updateFullName(fullName: String) {
         val currentState = _editProfileState.value as? EditProfileState.Success ?: return
         val updatedProfile = currentState.editedProfile.copy(
@@ -115,6 +117,7 @@ class EditProfileViewModel @Inject constructor(
     fun updateAvatarUri(uri: Uri) {
         _avatarUri.value = uri
     }
+
     sealed class EditProfileState {
         object Loading : EditProfileState()
         data class Success(
@@ -124,6 +127,7 @@ class EditProfileViewModel @Inject constructor(
             val isSaved: Boolean = false,
             val errorMessage: String = ""
         ) : EditProfileState()
+
         data class Error(val message: String) : EditProfileState()
     }
 }

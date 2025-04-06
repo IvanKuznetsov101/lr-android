@@ -28,6 +28,7 @@ class ReviewRepository @Inject constructor(
     suspend fun getAverageRatingByProfileId(id: Long) =
         safeApiCall { reviewService.getAverageRatingWithCountByProfileId(id) }
 
-    suspend fun getReviewByProfileIds(fromProfileId: Long, toProfileId: Long) = safeApiCall {reviewService.getReviewByProfileIds(fromProfileId, toProfileId)  }
+    suspend fun getReviewByProfileIds(fromProfileId: Long, toProfileId: Long) =
+        safeApiCall { reviewService.getReviewByProfileIds(fromProfileId, toProfileId) }
 
 }

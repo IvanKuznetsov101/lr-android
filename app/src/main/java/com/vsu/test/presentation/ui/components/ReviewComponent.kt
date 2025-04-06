@@ -1,4 +1,5 @@
 package com.vsu.test.presentation.ui.components
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,7 +27,8 @@ import com.vsu.test.presentation.viewmodel.ReviewsViewModel
 fun ReviewCard(
     review: ReviewWithProfile,
     reviewsViewModel: ReviewsViewModel,
-    onClick:() -> Unit) {
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,7 +36,7 @@ fun ReviewCard(
             .shadow(2.dp, RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .clickable{onClick()},
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
@@ -62,7 +64,7 @@ fun ReviewCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = review.createdAt?: "",
+                        text = review.createdAt ?: "",
                         color = Color.Gray
                     )
                 }

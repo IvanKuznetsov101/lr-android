@@ -34,9 +34,11 @@ import com.vsu.test.presentation.ui.components.ErrorMessageBox
 import com.vsu.test.presentation.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(viewModel: AuthViewModel = hiltViewModel(),
-                onLoginSuccess: () -> Unit,
-                onNavigateToRegistration:() -> Unit) {
+fun LoginScreen(
+    viewModel: AuthViewModel = hiltViewModel(),
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegistration: () -> Unit
+) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val errorMessage by viewModel.error.collectAsState()
@@ -93,7 +95,7 @@ fun LoginScreen(viewModel: AuthViewModel = hiltViewModel(),
                 }
             )
         )
-        if(errorMessage.isNotEmpty()){
+        if (errorMessage.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             ErrorMessageBox(errorMessage)
         }

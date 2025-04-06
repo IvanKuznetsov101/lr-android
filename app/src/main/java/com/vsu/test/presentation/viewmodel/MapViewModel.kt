@@ -3,13 +3,9 @@ package com.vsu.test.presentation.viewmodel
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PointF
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vsu.test.R
-import com.vsu.test.R.drawable.ic_dot_rose_24dp
-import com.vsu.test.R.drawable.ic_lightroom
 import com.vsu.test.data.api.model.dto.LightRoomDTO
 import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.domain.usecase.GetCurrentVisitorByProfileIdUseCase
@@ -24,7 +20,6 @@ import com.yandex.mapkit.layers.ObjectEvent
 import com.yandex.mapkit.map.CameraListener
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.CameraUpdateReason
-import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer

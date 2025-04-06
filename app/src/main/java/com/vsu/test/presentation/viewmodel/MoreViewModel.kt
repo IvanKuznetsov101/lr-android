@@ -53,7 +53,10 @@ class MoreViewModel @Inject constructor(
                     fusedLocationClient.getCurrentLocation(priority, cancellationTokenSource.token)
                         .addOnSuccessListener { location ->
                             if (location != null) {
-                                Log.d("Location", "Широта: ${location.latitude}, Долгота: ${location.longitude}")
+                                Log.d(
+                                    "Location",
+                                    "Широта: ${location.latitude}, Долгота: ${location.longitude}"
+                                )
                             } else {
                                 Log.d("Location", "Местоположение не найдено")
                             }
@@ -73,13 +76,15 @@ class MoreViewModel @Inject constructor(
             }
         }
     }
-    fun deleteLightRoomById(id: Long, context: Context){
+
+    fun deleteLightRoomById(id: Long, context: Context) {
         viewModelScope.launch {
             deleteLightRoomByIdUseCase.invoke(id)
             updateState(context)
         }
     }
-    fun createVisitor(lightRoomDTO: LightRoomDTO, context: Context){
+
+    fun createVisitor(lightRoomDTO: LightRoomDTO, context: Context) {
         viewModelScope.launch {
             val profileId = tokenManager.getId()
             createVisitorUseCase.invoke(profileId, lightRoomDTO.id)

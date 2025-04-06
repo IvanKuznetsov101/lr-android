@@ -45,7 +45,7 @@ fun MoreScreen(
     profileViewModel: ProfileViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit,
     onNavigateToMap: () -> Unit,
-    onNavigateToProfile:() -> Unit,
+    onNavigateToProfile: () -> Unit,
     navController: NavController,
 ) {
 
@@ -77,12 +77,14 @@ fun MoreScreen(
                 fontSize = 24.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ContentBox(state = state,
+            ContentBox(
+                state = state,
                 viewModel = viewModel,
                 eventViewModel = eventViewModel,
                 profileViewModel = profileViewModel,
                 context = context,
-                navController = navController)
+                navController = navController
+            )
             Spacer(modifier = Modifier.height(16.dp))
         }
         CombinedActions(
@@ -127,7 +129,10 @@ private fun ContentBox(
                         eventViewModel = eventViewModel,
                         visitorCount = state.eventWithDetails.visitorsCount,
                         onClickButton = {
-                            viewModel.deleteLightRoomById(state.eventWithDetails.lightRoom.id, context)
+                            viewModel.deleteLightRoomById(
+                                state.eventWithDetails.lightRoom.id,
+                                context
+                            )
                         },
                         onClickCard = {
                             isSheetOpen.value = true
@@ -148,6 +153,7 @@ private fun ContentBox(
 
 
                 }
+
                 is MoreState.EventsInRadius -> {
                     EventCarouselScreen(
                         eventsWithDetails = state.eventsWithDetails,
@@ -160,9 +166,11 @@ private fun ContentBox(
                         selectedEvent = selectedEvent
                     )
                 }
+
                 is MoreState.NoEvents -> {
                     PlaceholderContent()
                 }
+
                 is MoreState.Loading -> {
                     LoadingScreen()
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))

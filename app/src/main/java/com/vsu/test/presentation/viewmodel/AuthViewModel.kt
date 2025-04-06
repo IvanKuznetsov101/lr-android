@@ -1,9 +1,7 @@
 package com.vsu.test.presentation.viewmodel
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vsu.test.data.api.model.dto.JwtResponse
 import com.vsu.test.data.repository.AuthRepository
 import com.vsu.test.utils.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,10 +28,9 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
 
             val response = authRepository.login(username, password)
-            if (response is NetworkResult.Success){
+            if (response is NetworkResult.Success) {
                 _loginEvent.emit(LoginEvent.Success)
-            }
-            else{
+            } else {
                 error.value = "Invalid username or password"
                 _loginEvent.emit(LoginEvent.Error(response.message ?: "Error"))
             }

@@ -7,6 +7,7 @@ import javax.inject.Inject
 class UpdateProfileCoordinatesAndGetEventsUseCase @Inject constructor(
     private val profileRepository: ProfileRepository
 ) {
-    suspend fun invoke(locationData: LocationData) = profileRepository.updateProfileCoordinatesAndGetEvents(locationData)
+    suspend fun invoke(locationData: LocationData) =
+        profileRepository.updateProfileCoordinatesAndGetEvents(locationData)
 
 }

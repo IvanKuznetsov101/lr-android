@@ -7,11 +7,11 @@ import javax.inject.Inject
 
 class GetLastEventUseCase @Inject constructor(
 
-private val eventRepository: EventRepository
+    private val eventRepository: EventRepository
 ) {
-    suspend fun invoke(id: Long) : List<LastEvent> {
+    suspend fun invoke(id: Long): List<LastEvent> {
         val response = eventRepository.getLastEventsByProfileId(id)
-        if (response is NetworkResult.Success && response.data != null){
+        if (response is NetworkResult.Success && response.data != null) {
             return response.data
         }
         return emptyList()

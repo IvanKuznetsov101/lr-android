@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -35,8 +34,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,8 +52,6 @@ import com.vsu.test.domain.model.ProfileWithImage
 import com.vsu.test.presentation.ui.components.CombinedActions
 import com.vsu.test.presentation.ui.components.ErrorMessageBox
 import com.vsu.test.presentation.viewmodel.EditProfileViewModel
-import com.vsu.test.presentation.viewmodel.ProfileViewModel
-import java.time.LocalDate
 
 @Composable
 fun EditProfileScreen(
@@ -87,7 +82,7 @@ fun EditProfileScreen(
         is EditProfileViewModel.EditProfileState.Loading -> LoadingScreen()
         is EditProfileViewModel.EditProfileState.Success -> {
             val profile = (state as EditProfileViewModel.EditProfileState.Success).editedProfile
-            val errorMessage =  (state as EditProfileViewModel.EditProfileState.Success).errorMessage
+            val errorMessage = (state as EditProfileViewModel.EditProfileState.Success).errorMessage
             EditProfileContent(
                 profile = profile,
                 editProfileViewModel = editProfileViewModel,
@@ -102,6 +97,7 @@ fun EditProfileScreen(
                 }
             )
         }
+
         is EditProfileViewModel.EditProfileState.Error -> {
             val message = (state as EditProfileViewModel.EditProfileState.Error).message
             ErrorScreen(message)
@@ -120,7 +116,11 @@ fun EditProfileContent(
     onProfileUpdated: () -> Unit,
     onImagePick: () -> Unit
 ) {
-    var showDatePicker by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showDatePicker by androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf(
+            false
+        )
+    }
     val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier
@@ -146,7 +146,7 @@ fun EditProfileContent(
             error = painterResource(R.drawable.placeholder),
             imageLoader = editProfileViewModel.imageLoader,
 
-        )
+            )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -254,7 +254,7 @@ fun EditProfileContent(
                 }
             }
         )
-        if (errorMessage.isNotEmpty()){
+        if (errorMessage.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             ErrorMessageBox(errorMessage)
         }

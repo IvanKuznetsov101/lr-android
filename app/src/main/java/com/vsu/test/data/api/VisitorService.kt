@@ -1,18 +1,13 @@
 package com.vsu.test.data.api
 
-import com.vsu.test.data.api.model.dto.EventDTO
-import com.vsu.test.data.api.model.dto.ProfileDTO
 import com.vsu.test.data.api.model.dto.VisitorDTO
 import com.vsu.test.data.api.model.request.CreateVisitorRequest
-import com.vsu.test.data.api.model.request.SignUpRequest
-import com.vsu.test.data.api.model.request.UpdateProfileCoordinatesRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface VisitorService {
     @POST("/api/visitors")
@@ -25,5 +20,5 @@ interface VisitorService {
     suspend fun getVisitorByProfileId(@Path("id") id: Long): Response<VisitorDTO>
 
     @GET("/api/visitors/lightroom/{id}")
-    suspend fun  getVisitorCountByLightRoomId(@Path("id") id: Long): Response<Long>
+    suspend fun getVisitorCountByLightRoomId(@Path("id") id: Long): Response<Long>
 }

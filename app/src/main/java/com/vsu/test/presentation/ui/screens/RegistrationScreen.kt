@@ -32,8 +32,10 @@ import com.vsu.test.presentation.ui.components.ErrorMessageBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
-                       onNavigateToLogin: () -> Unit) {
+fun RegistrationScreen(
+    viewModel: RegistrationViewModel = hiltViewModel(),
+    onNavigateToLogin: () -> Unit
+) {
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -43,10 +45,8 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
     val context = LocalContext.current
     val errorMessage by viewModel.error.collectAsState()
     val focusManager = LocalFocusManager.current
-    // Подписка на состояние из ViewModel
     val registrationState by viewModel.registrationState.observeAsState()
 
-    // Coroutine scope для асинхронных операций
     val coroutineScope = rememberCoroutineScope()
 
     Column(
@@ -56,7 +56,6 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Поле "Full Name"
         OutlinedTextField(
             value = fullName,
             onValueChange = { fullName = it },
@@ -76,7 +75,6 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Поле "Username"
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
@@ -92,13 +90,12 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
                 cursorColor = Color.Black,
                 focusedLabelColor = Color.Black,
 
-            ),
+                ),
 
-        )
+            )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Поле "Password"
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -119,7 +116,6 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Поле "Email"
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -139,7 +135,6 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Поле "Date of Birth" с DatePicker
         OutlinedTextField(
             value = dateOfBirth.toString(),
             onValueChange = {},
@@ -191,25 +186,25 @@ fun RegistrationScreen(viewModel: RegistrationViewModel = hiltViewModel(),
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        if(errorMessage.isNotEmpty()){
+        if (errorMessage.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             ErrorMessageBox(errorMessage)
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Кнопка "Register"
         DefaultButton(
             onClick = {
                 coroutineScope.launch {
-                val signUpData = SignUpData(fullName, username, password, email, dateOfBirth)
-                viewModel.createProfile(signUpData)
-            } },
+                    val signUpData = SignUpData(fullName, username, password, email, dateOfBirth)
+                    viewModel.createProfile(signUpData)
+                }
+            },
             text = "Registration",
             icon = null
         )
         Spacer(modifier = Modifier.height(16.dp))
         DefaultButton(
-            onClick = { onNavigateToLogin()},
+            onClick = { onNavigateToLogin() },
             text = "Login",
             icon = null
         )

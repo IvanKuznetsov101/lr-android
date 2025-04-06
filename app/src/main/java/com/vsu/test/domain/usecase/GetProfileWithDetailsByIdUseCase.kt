@@ -14,10 +14,13 @@ class GetProfileWithDetailsByIdUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(profileId: Long): ProfileWithDetails? {
         val profileResponse = profileRepository.getProfileById(profileId)
-        val profileImageUrlResponse = profileResponse.data?.let { imageRepository.getImageUrlByProfileId(it.id) }
-        val averageRatingWithCountResponse =  profileResponse.data?.let {reviewRepository.getAverageRatingByProfileId(it.id) }
+        val profileImageUrlResponse =
+            profileResponse.data?.let { imageRepository.getImageUrlByProfileId(it.id) }
+        val averageRatingWithCountResponse =
+            profileResponse.data?.let { reviewRepository.getAverageRatingByProfileId(it.id) }
         return if (profileResponse is NetworkResult.Success && profileResponse.data != null &&
-            averageRatingWithCountResponse is NetworkResult.Success && averageRatingWithCountResponse.data != null)
+            averageRatingWithCountResponse is NetworkResult.Success && averageRatingWithCountResponse.data != null
+        )
             ProfileWithDetails(
                 profileResponse.data,
                 profileImageUrlResponse?.data.toString(),

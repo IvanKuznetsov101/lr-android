@@ -1,4 +1,5 @@
 package com.vsu.test.utils
+
 import retrofit2.Response
 
 
@@ -12,7 +13,9 @@ abstract class BaseApiResponse {
                     return NetworkResult.Success(body)
                 } ?: return errorMessage("Body is empty")
             } else {
-                return errorMessage(response.errorBody()?.string() ?: "${response.code()} ${response.message()}")
+                return errorMessage(
+                    response.errorBody()?.string() ?: "${response.code()} ${response.message()}"
+                )
             }
         } catch (e: Exception) {
             return errorMessage(e.message.toString())

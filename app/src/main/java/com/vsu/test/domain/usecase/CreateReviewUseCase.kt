@@ -7,7 +7,7 @@ import javax.inject.Inject
 class CreateReviewUseCase @Inject constructor(
     private val reviewRepository: ReviewRepository
 ) {
-    suspend fun invoke (fromProfileId: Long, toProfileId: Long, text: String, rating: Int ) {
+    suspend fun invoke(fromProfileId: Long, toProfileId: Long, text: String, rating: Int) {
         if (text.isBlank()) {
             throw IllegalArgumentException("Текст отзыва не может быть пустым")
         }
@@ -20,7 +20,7 @@ class CreateReviewUseCase @Inject constructor(
             text = text,
             rating = rating
         )
-        if (response is NetworkResult.Error){
+        if (response is NetworkResult.Error) {
             throw IllegalArgumentException(response.message.toString())
         }
     }

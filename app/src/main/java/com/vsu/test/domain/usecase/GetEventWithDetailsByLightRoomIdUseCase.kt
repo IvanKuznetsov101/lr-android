@@ -36,7 +36,7 @@ class GetEventWithDetailsByLightRoomIdUseCase @Inject constructor(
 
         if (event == null || visitorInfo == null || lightRoom == null ||
             /*isHere == null ||*/ count == null || profileWithDetails == null
-            ) {
+        ) {
             return null
         }
         return EventWithDetails(
@@ -48,30 +48,38 @@ class GetEventWithDetailsByLightRoomIdUseCase @Inject constructor(
             eventImagesUrls = eventImagesUrls
         )
     }
+
     private suspend fun getLightRoomByEventId(eventId: Long): LightRoomDTO? {
         val response = lightRoomRepository.getLightRoomByEventID(eventId)
         return if (response is NetworkResult.Success) response.data else null
     }
+
     private suspend fun getImagesByEventId(eventId: Long): List<String>? {
         val response = imageRepository.getImagesUrlsByEventId(eventId)
         return if (response is NetworkResult.Success) response.data else null
     }
+
     private suspend fun getProfileWithDetailsByEventId(eventId: Long): ProfileWithDetails? {
         val profileResponse = profileRepository.getProfileByEventId(eventId)
-        val profileImageUrlResponse = profileResponse.data?.let { imageRepository.getImageUrlByProfileId(it.id) }
-        val averageRatingWithCountResponse =  profileResponse.data?.let {reviewRepository.getAverageRatingByProfileId(it.id) }
-         return if (profileResponse is NetworkResult.Success && profileResponse.data != null &&
-            averageRatingWithCountResponse is NetworkResult.Success && averageRatingWithCountResponse.data != null)
-        ProfileWithDetails(
-            profileResponse.data,
-            profileImageUrlResponse?.data.toString(),
-            averageRatingWithCountResponse.data
-        ) else return null
+        val profileImageUrlResponse =
+            profileResponse.data?.let { imageRepository.getImageUrlByProfileId(it.id) }
+        val averageRatingWithCountResponse =
+            profileResponse.data?.let { reviewRepository.getAverageRatingByProfileId(it.id) }
+        return if (profileResponse is NetworkResult.Success && profileResponse.data != null &&
+            averageRatingWithCountResponse is NetworkResult.Success && averageRatingWithCountResponse.data != null
+        )
+            ProfileWithDetails(
+                profileResponse.data,
+                profileImageUrlResponse?.data.toString(),
+                averageRatingWithCountResponse.data
+            ) else return null
     }
+
     private suspend fun getEventByLightRoomId(lightRoomId: Long): EventDTO? {
         val response = eventRepository.getEventByLightRoomId(lightRoomId)
-     return if (response is NetworkResult.Success) response.data else null
+        return if (response is NetworkResult.Success) response.data else null
     }
+
     private suspend fun getVisitorCountByLightRoomId(lightRoomId: Long): Long {
         val response = visitorRepository.getVisitorCountByLightRoomId(lightRoomId)
         return if (response is NetworkResult.Success) response.data!! else 0L

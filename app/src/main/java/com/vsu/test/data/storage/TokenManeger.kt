@@ -37,7 +37,7 @@ class TokenManager @Inject constructor(@ApplicationContext context: Context) {
     }
 
     fun getAccessToken(): String? = prefs.getString("access_token", null)
-    fun getId(): Long = prefs.getLong("id", -1L )
+    fun getId(): Long = prefs.getLong("id", -1L)
 
     fun getRefreshToken(): String? = prefs.getString("refresh_token", null)
 

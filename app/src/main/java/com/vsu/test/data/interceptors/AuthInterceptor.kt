@@ -10,7 +10,6 @@ class AuthInterceptor @Inject constructor(private val tokenManager: TokenManager
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
         val url = originalRequest.url.toString()
-        // Не добавляем токен для auth-эндпоинтов
         if (url.contains("api/auth/login") || url.contains("api/auth/token") || url.contains("api/auth/refresh")) {
             return chain.proceed(originalRequest)
         }

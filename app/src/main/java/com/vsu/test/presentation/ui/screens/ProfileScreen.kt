@@ -21,13 +21,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +42,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -55,19 +51,14 @@ import coil.compose.AsyncImage
 import com.vsu.test.R
 import com.vsu.test.Screen
 import com.vsu.test.data.api.model.dto.LastEvent
-import com.vsu.test.data.api.model.dto.LightRoomDTO
-import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.domain.model.ProfileWithDetails
 import com.vsu.test.presentation.ui.components.BackButton
 import com.vsu.test.presentation.ui.components.CombinedActions
-import com.vsu.test.presentation.ui.components.EventCard
 import com.vsu.test.presentation.ui.components.LastEventCard
-import com.vsu.test.presentation.ui.components.ReviewCard
 import com.vsu.test.presentation.ui.components.ReviewDialog
 import com.vsu.test.presentation.ui.components.StarRating
 import com.vsu.test.presentation.viewmodel.ProfileViewModel
 import com.vsu.test.presentation.viewmodel.ReviewsViewModel
-import javax.inject.Inject
 
 @Composable
 fun ProfileScreen(
@@ -89,7 +80,8 @@ fun ProfileScreen(
 
     when (state) {
         is ProfileViewModel.ProfileState.Loading -> LoadingScreen()
-        is ProfileViewModel.ProfileState.Success -> ProfileContent(profileViewModel,
+        is ProfileViewModel.ProfileState.Success -> ProfileContent(
+            profileViewModel,
             (state as ProfileViewModel.ProfileState.Success).profile,
             isOwnProfile,
             onEditProfile,
@@ -99,7 +91,8 @@ fun ProfileScreen(
             reviewsViewModel,
             showReview = showReview,
             onShowReviewChange = { showReview = it },
-            context = context)
+            context = context
+        )
 
         is ProfileViewModel.ProfileState.Error -> ErrorScreen((state as ProfileViewModel.ProfileState.Error).message)
     }
@@ -148,18 +141,18 @@ fun ProfileContent(
             .background(color = Color.White)
     ) {
         if (isOwnProfile) {
-            if (combinedVisible){
-                    CombinedActions(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .offset(x = 32.dp, y = (-40).dp)
-                            .zIndex(1f),
-                        leftButton =  onEditProfile,
-                        rightButton = onBackButton,
-                        Icons.Default.Edit,
-                        Icons.Default.ArrowBack
-                    )
-                }
+            if (combinedVisible) {
+                CombinedActions(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 32.dp, y = (-40).dp)
+                        .zIndex(1f),
+                    leftButton = onEditProfile,
+                    rightButton = onBackButton,
+                    Icons.Default.Edit,
+                    Icons.Default.ArrowBack
+                )
+            }
 
         } else {
             BackButton(
@@ -217,9 +210,11 @@ fun ProfileContent(
                 }) {
                 StarRating(profile.ratingWithCount.averageRating)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "(${profile.ratingWithCount.count.toString()})",
+                Text(
+                    text = "(${profile.ratingWithCount.count.toString()})",
                     color = Color.Gray,
-                    fontSize = 14.sp)
+                    fontSize = 14.sp
+                )
             }
 
 
@@ -273,10 +268,12 @@ fun ProfileContent(
                         .zIndex(2f),
                     onSuccess = {
                         onShowReviewChange(!showReview)
-                        combinedVisible = true },
+                        combinedVisible = true
+                    },
                     onDismiss = {
                         onShowReviewChange(!showReview)
-                        combinedVisible = true},
+                        combinedVisible = true
+                    },
                     reviewsViewModel = reviewsViewModel,
                     navController = navController,
                     context = context

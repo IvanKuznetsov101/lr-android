@@ -38,9 +38,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LocationService : Service() {
 
-    @Inject lateinit var updateProfileCoordinatesUseCase: UpdateProfileCoordinatesAndGetIdsUseCase
-    @Inject lateinit var getEventByLightRoomIdUseCase: GetEventByLightRoomIdUseCase
-    @Inject lateinit var tokenManager: TokenManager
+    @Inject
+    lateinit var updateProfileCoordinatesUseCase: UpdateProfileCoordinatesAndGetIdsUseCase
+    @Inject
+    lateinit var getEventByLightRoomIdUseCase: GetEventByLightRoomIdUseCase
+    @Inject
+    lateinit var tokenManager: TokenManager
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val scope = CoroutineScope(Dispatchers.IO)
     private lateinit var notificationManager: NotificationManager
@@ -75,7 +78,10 @@ class LocationService : Service() {
 
     private fun startLocationUpdates() {
         if (!hasLocationPermissions()) {
-            Log.e("LocationService", "Insufficient permissions for location access, stopping service")
+            Log.e(
+                "LocationService",
+                "Insufficient permissions for location access, stopping service"
+            )
             stopSelf()
             return
         }
@@ -125,7 +131,11 @@ class LocationService : Service() {
         }
 
         try {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                mainLooper
+            )
         } catch (e: SecurityException) {
             Log.e("LocationService", "SecurityException: ${e.message}, stopping service")
             stopSelf()
@@ -196,7 +206,10 @@ class LocationService : Service() {
             .setContentIntent(pendingIntent)
             .setOngoing(true) // Нельзя смахнуть
         val notification = builder.build()
-        Log.d("LocationService", "Service notification created with ongoing=${notification.flags and Notification.FLAG_ONGOING_EVENT != 0}")
+        Log.d(
+            "LocationService",
+            "Service notification created with ongoing=${notification.flags and Notification.FLAG_ONGOING_EVENT != 0}"
+        )
         return notification
     }
 

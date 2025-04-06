@@ -5,7 +5,8 @@ import javax.inject.Inject
 
 class GetEventByLightRoomIdUseCase @Inject constructor(
 
-private val eventRepository: EventRepository
+    private val eventRepository: EventRepository
 ) {
-    suspend fun invoke(lightRoomId: Long) = eventRepository.getEventByLightRoomId(lightRoomId = lightRoomId)
+    suspend fun invoke(lightRoomId: Long) =
+        eventRepository.getEventByLightRoomId(lightRoomId = lightRoomId)
 }

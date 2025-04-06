@@ -3,15 +3,10 @@ package com.vsu.test.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
-import com.vsu.test.data.api.model.dto.ExtendedProfileDTO
 import com.vsu.test.data.api.model.dto.LastEvent
-import com.vsu.test.data.storage.TokenManager
 import com.vsu.test.domain.model.ProfileWithDetails
-import com.vsu.test.domain.model.ProfileWithImage
 import com.vsu.test.domain.usecase.GetLastEventUseCase
-import com.vsu.test.domain.usecase.GetProfileByIdUseCase
 import com.vsu.test.domain.usecase.GetProfileWithDetailsByIdUseCase
-import com.vsu.test.domain.usecase.MoreState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,12 +28,11 @@ class ProfileViewModel @Inject constructor(
             _profileState.value = ProfileState.Loading
             try {
                 val profile = getProfileWithDetailsByIdUseCase(profileId)
-                if(profile != null){
-                    if (isOwnProfile){
+                if (profile != null) {
+                    if (isOwnProfile) {
                         val events = getLastEventUseCase.invoke(profileId)
                         _profileState.value = ProfileState.Success(profile, events)
-                    }
-                    else {
+                    } else {
                         _profileState.value = ProfileState.Success(profile, null)
                     }
                 }
@@ -50,8 +44,11 @@ class ProfileViewModel @Inject constructor(
 
     sealed class ProfileState {
         object Loading : ProfileState()
-        data class Success(val profile: ProfileWithDetails,
-            val events: List<LastEvent>?) : ProfileState()
+        data class Success(
+            val profile: ProfileWithDetails,
+            val events: List<LastEvent>?
+        ) : ProfileState()
+
         data class Error(val message: String) : ProfileState()
     }
 }

@@ -35,7 +35,8 @@ import com.vsu.test.presentation.ui.screens.ReviewScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject lateinit var tokenManager: TokenManager
+    @Inject
+    lateinit var tokenManager: TokenManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,7 +82,8 @@ class MainActivity : ComponentActivity() {
                     composable(Screen.Map.route()) {
                         MapScreen(
                             onNavigateToMore = { navController.navigate(Screen.More.route()) },
-                            navController = navController)
+                            navController = navController
+                        )
                     }
                     composable(Screen.More.route()) {
                         MoreScreen(
@@ -111,7 +113,8 @@ class MainActivity : ComponentActivity() {
                         route = Screen.Profile.routePattern,
                         arguments = listOf(navArgument("profileId") { type = NavType.StringType })
                     ) { backStackEntry ->
-                        val profileId = backStackEntry.arguments?.getString("profileId")?.toLong() ?: return@composable
+                        val profileId = backStackEntry.arguments?.getString("profileId")?.toLong()
+                            ?: return@composable
                         val currentProfileId = tokenManager.getId()
                         val isOwnProfile = profileId == currentProfileId
                         ProfileScreen(
@@ -132,7 +135,8 @@ class MainActivity : ComponentActivity() {
                         route = Screen.Reviews.routePattern,
                         arguments = listOf(navArgument("profileId") { type = NavType.StringType })
                     ) { backStackEntry ->
-                        val profileId = backStackEntry.arguments?.getString("profileId")?.toLong() ?: return@composable
+                        val profileId = backStackEntry.arguments?.getString("profileId")?.toLong()
+                            ?: return@composable
 
                         ReviewScreen(
                             profileId = profileId,
@@ -217,6 +221,7 @@ sealed class Screen {
             return "profile/${args[0]}"
         }
     }
+
     object Reviews : Screen() {
         override val routePattern = "reviews/{profileId}"
         override fun route(vararg args: Any): String {

@@ -14,23 +14,35 @@ import retrofit2.http.Query
 
 interface EventService {
     @GET("/api/events/profile/{profileId}")
-    suspend fun getEventByProfileId(@Path("profileId") profileId: Long, @Query("type") type: String = "not-used"): Response<List<EventDTO>>
+    suspend fun getEventByProfileId(
+        @Path("profileId") profileId: Long,
+        @Query("type") type: String = "not-used"
+    ): Response<List<EventDTO>>
 
     @GET("/api/events/profile/{profileId}")
-    suspend fun getActualEventByProfileId(@Path("profileId") profileId: Long, @Query("type") type: String = "actual-event"): Response<EventDTO>
+    suspend fun getActualEventByProfileId(
+        @Path("profileId") profileId: Long,
+        @Query("type") type: String = "actual-event"
+    ): Response<EventDTO>
 
     @GET("/api/events/profile/{profileId}")
-    suspend fun getLastEventsByProfileId(@Path("profileId") profileId: Long, @Query("type") type: String = "last-events"): Response<List<LastEvent>>
+    suspend fun getLastEventsByProfileId(
+        @Path("profileId") profileId: Long,
+        @Query("type") type: String = "last-events"
+    ): Response<List<LastEvent>>
 
     @POST("/api/events")
     suspend fun createEvent(@Body eventRequest: EventRequest): Response<EventDTO>
 
     @PUT("/api/events/{id}")
-    suspend fun updateEvent(@Path("id") id: Long, @Body eventRequest: EventRequest):Response<EventDTO>
+    suspend fun updateEvent(
+        @Path("id") id: Long,
+        @Body eventRequest: EventRequest
+    ): Response<EventDTO>
 
     @DELETE("/api/events/{id}")
     suspend fun deleteEvent(@Path("id") id: Long): Response<EventDTO>
 
     @GET("/api/events/lightRoom/{lightRoomId}")
-    suspend fun getEventByLightRoomId(@Path("lightRoomId") lightRoomId: Long):Response<EventDTO>
+    suspend fun getEventByLightRoomId(@Path("lightRoomId") lightRoomId: Long): Response<EventDTO>
 }

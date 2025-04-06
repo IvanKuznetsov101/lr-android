@@ -255,7 +255,7 @@ fun MapControls(
                 .align(Alignment.BottomEnd)
                 .offset(x = 32.dp, y = (-40).dp),
             leftButton = {
-                if(viewModel.checkVisitorInfo()){
+                if (viewModel.checkVisitorInfo()) {
                     onNavigateToMore()
                 } else {
                     showEventsSheet = true
@@ -282,10 +282,12 @@ fun MapControls(
                         if (isLoading) {
                             LoadingScreen()
                         } else {
-                            if (profileHasEvent.value ){
-                                Column(modifier = Modifier.fillMaxSize(),
+                            if (profileHasEvent.value) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
                                     verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                                     Text("You already have an event created")
                                     Spacer(modifier = Modifier.height(16.dp))
                                     DefaultButton(

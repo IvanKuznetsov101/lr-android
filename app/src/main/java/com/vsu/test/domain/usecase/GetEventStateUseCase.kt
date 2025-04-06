@@ -15,7 +15,6 @@ class GetEventStateUseCase @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val lightRoomRepository: LightRoomRepository,
     private val visitorRepository: VisitorRepository,
-    private val updateEndTimeVisitorUseCase: UpdateEndTimeVisitorUseCase,
     private val getEventWithDetailsByLightRoomIdUseCase: GetEventWithDetailsByLightRoomIdUseCase
 ) {
     suspend operator fun invoke(locationData: LocationData): MoreState {
@@ -23,7 +22,8 @@ class GetEventStateUseCase @Inject constructor(
         if (profileEvent is NetworkResult.Success) {
             val profileLightRoom = getLightRoomByEventId(profileEvent.data!!.id)
             if (profileLightRoom != null) {
-                val profileEventWithDetails = getEventWithDetailsByLightRoomIdUseCase.invoke(profileLightRoom)
+                val profileEventWithDetails =
+                    getEventWithDetailsByLightRoomIdUseCase.invoke(profileLightRoom)
                 return MoreState.UserEvent(profileEventWithDetails!!)
             }
         }
@@ -44,33 +44,13 @@ class GetEventStateUseCase @Inject constructor(
         val response = lightRoomRepository.getLightRoomByEventID(eventId)
         return if (response is NetworkResult.Success) response.data else null
     }
+
     private suspend fun getVisitorCountByLightRoomId(lightRoomId: Long): Long {
         val response = visitorRepository.getVisitorCountByLightRoomId(lightRoomId)
         return if (response is NetworkResult.Success) response.data!! else 0L
     }
-
-//    private suspend fun getVisitorState(profileId: Long): VisitorInfo {
-//        val storedVisitorId = visitorIdStorage.getVisitorInfo()?.visitorId
-//        val visitorResponse = visitorRepository.getCurrentVisitorByProfileId(profileId)
-//
-//        if (visitorResponse is NetworkResult.Success) {
-//            val newVisitorInfo = VisitorInfo(
-//                visitorId = visitorResponse.data!!.idVisitor,
-//                lightRoomId = visitorResponse.data.idLightRoom,
-//                profileId = visitorResponse.data.idProfile
-//            )
-//            if (storedVisitorId != newVisitorInfo.visitorId) {
-//                visitorIdStorage.clearVisitorInfo()
-//                visitorIdStorage.saveVisitorInfo(newVisitorInfo)
-//            }
-//            return newVisitorInfo
-//        }
-//
-//        return VisitorInfo(visitorId = null, lightRoomId = null, profileId = null).also {
-//            visitorIdStorage.saveVisitorInfo(it)
-//        }
-//    }
 }
+
 sealed class MoreState {
     object Loading : MoreState()
     data class UserEvent(val eventWithDetails: EventWithDetails) : MoreState()

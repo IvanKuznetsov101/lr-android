@@ -10,10 +10,10 @@ class GetReviewByProfileIdsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(fromProfileId: Long, toProfileId: Long): ReviewWithProfile {
         val response = reviewRepository.getReviewByProfileIds(fromProfileId, toProfileId)
-        if(response is NetworkResult.Error){
+        if (response is NetworkResult.Error) {
             throw IllegalArgumentException(response.message)
         }
-        if (response.data == null){
+        if (response.data == null) {
             throw IllegalArgumentException("data is null")
         }
         return response.data

@@ -1,4 +1,3 @@
-
 package com.vsu.test.presentation.viewmodel
 
 import androidx.lifecycle.LiveData
@@ -8,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.vsu.test.data.api.model.dto.ProfileDTO
 import com.vsu.test.domain.model.SignUpData
 import com.vsu.test.domain.usecase.CreateProfileUseCase
-import com.vsu.test.presentation.viewmodel.AuthViewModel.LoginEvent
 import com.vsu.test.utils.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,10 +19,7 @@ import javax.inject.Inject
 class RegistrationViewModel @Inject constructor(
     private val createProfileUseCase: CreateProfileUseCase
 ) : ViewModel() {
-
-
     private val _registrationState = MutableLiveData<NetworkResult<ProfileDTO>?>(null)
-
     val registrationState: LiveData<NetworkResult<ProfileDTO>?> = _registrationState
 
     private val _registrationEvent = MutableSharedFlow<RegistrationEvent>()
@@ -38,19 +33,17 @@ class RegistrationViewModel @Inject constructor(
 
     fun createProfile(signUpData: SignUpData) {
         viewModelScope.launch {
-           try{
-               val response = createProfileUseCase.invoke(signUpData)
-               if (response is NetworkResult.Success){
-                   _registrationEvent.emit(RegistrationEvent.Success)
-               }
-               else{
-                   error.value = response.message ?: "Error"
-                   _registrationEvent.emit(RegistrationEvent.Error(response.message ?: "Error"))
-               }
-           }
-           catch (e: Exception){
+            try {
+                val response = createProfileUseCase.invoke(signUpData)
+                if (response is NetworkResult.Success) {
+                    _registrationEvent.emit(RegistrationEvent.Success)
+                } else {
+                    error.value = response.message ?: "Error"
+                    _registrationEvent.emit(RegistrationEvent.Error(response.message ?: "Error"))
+                }
+            } catch (e: Exception) {
                 error.value = e.message.toString()
-           }
+            }
         }
     }
 }
